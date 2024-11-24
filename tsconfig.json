@@ -1,0 +1,26 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "allowJs": true,
+        "target": "ESNext",
+        "module": "CommonJS",
+        "outDir": "dist",
+        "rootDir": "./src",
+        "moduleResolution": "node",
+        "strictNullChecks": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "baseUrl": ".",
+        "paths": {
+          "@/*": [
+            "src/*"
+          ]
+        }
+    },
+    "include": [
+        "src/**/*.ts"],
+    "exclude": [
+        "node_modules"
+    ]
+}
