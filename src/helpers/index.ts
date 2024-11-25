@@ -30,9 +30,11 @@ export const generateAccessToken = async (id: Types.ObjectId | string) => {
   return jsonwebtoken.sign(
     payload, 
     process.env.ACCESS_TOKEN_SECRET as string, 
-    { expiresIn: "50d", }
+    { expiresIn: "30d", }
   );
 };
+
+export const verifyAccessToken = async (token: string) => {};
 
 /**
  * generate a random otp of a given length for verification

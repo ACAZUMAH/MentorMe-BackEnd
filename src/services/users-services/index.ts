@@ -14,8 +14,9 @@ import { hashPassword } from "../../helpers";
  */
 export const createUser = async (data: userType) => {
     await validateAuthData(data);
+
     const hash = await hashPassword(data.password);
-    const user = await User.create({ ...data, password: hash});
+    const user = await User.create({ ...data, password: hash });
     if(!user){
         throw new createHttpError.InternalServerError('Could not create user');
     }

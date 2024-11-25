@@ -31,7 +31,7 @@ export const validateAuthData = async (data: userType) => {
     if (!isValid) {
         const errors = validate.errors?.map(error => {
             return { key: error.instancePath, message: error.message };
-        })
+        });
         throw new createHttpError.BadRequest( JSON.stringify(errors) );
     };
 };

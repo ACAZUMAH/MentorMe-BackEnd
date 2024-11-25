@@ -12,7 +12,7 @@ const errorHandler = (err:any, req:Request, res:Response, next:NextFunction) => 
     if(err instanceof createHttpError.HttpError){
         res.status(err.statusCode).json({ errors: [{ message: err.message }] });
     }
-    res.status(500).json({errors: [{ message: 'Internal Server Error' }]});
+    return res.status(500).json({errors: [{ message: 'Internal Server Error' }]});
 };
 
 export default errorHandler; 

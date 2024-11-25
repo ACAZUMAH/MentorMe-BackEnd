@@ -19,7 +19,7 @@ export const createuser = async (req: Request, res: Response) => {
   const sent = await generateOtpAndSendSms(user._id, phone);
   if (sent) {
     return res.status(201)
-      .json({ message: "User created  verify your otp to get authenticated " });
+      .json({ message: "User created verify your otp to get authenticated " });
   };
 };
 

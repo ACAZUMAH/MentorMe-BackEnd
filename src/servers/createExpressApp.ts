@@ -10,7 +10,7 @@ const createExpressApp = async (): Promise<Application> => {
     app.use(errorHandler); 
 
     app.all('*', (req, res) => {
-        res.json({ message: 'unable to retrieve requested resource' });
+        return res.json({ message: 'unable to retrieve requested resource' });
     });
 
     return Promise.resolve(app);
