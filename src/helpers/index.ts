@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jsonwebtoken from "jsonwebtoken";
 import { Types } from "mongoose";
+import { Request, Response, NextFunction } from "express";
 
 /**
  *
@@ -34,7 +35,27 @@ export const generateAccessToken = async (id: Types.ObjectId | string) => {
   );
 };
 
-export const verifyAccessToken = async (token: string) => {};
+/**
+ * 
+ * @param req 
+ * @param res 
+ * @param next 
+ * @returns 
+ */
+export const verifyAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if(!token) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  jsonwebtoken.verify(token, process.env.ACCESS_TOKEN_SECRET as string, (err, user) => {
+    if(err) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    req.user = user;
+    next();
+  });
+};
 
 /**
  * generate a random otp of a given length for verification

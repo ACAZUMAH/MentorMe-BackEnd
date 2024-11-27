@@ -15,7 +15,7 @@ import { hashPassword } from "../../helpers";
 export const createUser = async (data: userType) => {
     await validateAuthData(data);
 
-    const hash = await hashPassword(data.password);
+    const hash = await hashPassword(data.password as string);
     const user = await User.create({ ...data, password: hash });
     if(!user){
         throw new createHttpError.InternalServerError('Could not create user');
@@ -25,13 +25,42 @@ export const createUser = async (data: userType) => {
 };
 
 /**
+ * create a new user in the database with google data for those signing in with google
+ * @param data required user data
+ * @returns created user
+ * @throws 500 if user could not be created
+ */
+export const createGoogleUser = async (data: userType) => {
+
+    const user = await User.create({ ...data });
+    if(!user){
+        throw new createHttpError.InternalServerError('Could not create user');
+    }
+    return user;
+};
+
+/**
  * checks if a user already exists with the phone number
  * @param phone user's phone number
+ * @throws 409 if user already exists
  */
 export const checkUserExists = async (phone: string) => {
     if(await User.exists({ phone })){
         throw new createHttpError.Conflict('User already exists');
     };
+};
+
+/**
+ * find a user from the database by email
+ * @param email user's email
+ * @returns found user
+ * @throws 404 if no user found with the email
+ */
+export const findUserByEmail = async (email: string) => {
+    /*if(!await User.exists({ email })){
+        throw new createHttpError.NotFound('No user found with this email');
+    };*/
+    return await User.findOne({ email });
 };
 
 /**
@@ -41,7 +70,7 @@ export const checkUserExists = async (phone: string) => {
  */
 export const getUserByPhone = async (phone: string) => {
     if(!await User.exists({ phone })){
-        throw new createHttpError.NotFound('No user found with this phone numbr');
+        throw new createHttpError.NotFound('No user found with this phone number');
     };
     return await User.findOne({ phone });
 };
@@ -82,4 +111,22 @@ export const findUserByIdAndUpdate = async (id: string | Types.ObjectId, data: u
         throw new createHttpError.NotFound('No user found with this id');
     }
     return user;
+};
+
+/**
+ * find a user by id and delete the user
+ * @param id id of the user
+ * @returns deleted user
+ * @throws 404 if no user found with the id
+ * @throws 400 if the id is invalid
+ */
+export const findUserByIdAndDelete = async (id: string | Types.ObjectId) => {
+    if(!Types.ObjectId.isValid(id)){
+        throw new createHttpError.BadRequest('Invalid user id');
+    }
+    const user = await User.findByIdAndDelete({ _id: id });
+    if(!user){
+        throw new createHttpError.NotFound('No user found with this id');
+    }
+    return user;    
 };
