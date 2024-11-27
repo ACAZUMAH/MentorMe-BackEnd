@@ -36,6 +36,40 @@ export const validateAuthData = async (data: userType) => {
     };
 };
 
-export const validateProfileData = async () => {
-
+/**
+ * validate user profile data before creating a user profile
+ * @param data required user profile data
+ */
+export const validateProfileData = async (data: userType) => {
+    const ajv = new Ajv();
+    addFormat(ajv);
+    ajv.addFormat('email', {
+        type: 'string',
+        validate: (value: string) => {
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return emailRegex.test(value);
+        }
+    });
+    const schema = {
+        type: 'object',
+        properties: {
+            fullName: { type: 'string', maxLength: 100 },
+            profile_url: { type: 'string', format: 'uri' },
+            email: { type: 'string', format: 'email' },
+            role: { type: 'string' },
+            programmeOfStudy: { type: 'string' },
+            level: { type: 'string' },
+            about: { type: 'string', maxLength: 250 },
+            acadamicFields: { type: 'string' },
+        },
+        required: ['fullName', 'role'], 
+    };
+    const validate = ajv.compile(schema);
+    const isValid = validate(data);
+    if (!isValid) {
+        const errors = validate.errors?.map(error => {
+            return { key: error.instancePath, message: error.message };
+        })
+        throw new createHttpError.BadRequest(JSON.stringify(errors));
+    };
 };

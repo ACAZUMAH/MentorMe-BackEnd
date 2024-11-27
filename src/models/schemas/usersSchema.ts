@@ -4,7 +4,7 @@ const usersSchema = new mongoose.Schema({
     fullName: { type: String, maxLength: 100 },
     profile_url: { type: String },
     phone: { type: String, required: true, unique: true },
-    email: { type: String,  unique: true },
+    email: { type: String, unique: false},
     role: { type: String },
     programmeOfStudy: { type: String },
     level: { type: String },

@@ -7,7 +7,7 @@ const createExpressApp = async (): Promise<Application> => {
     const app = express();
     app.use(express.json());
     app.use(route);
-    app.use(errorHandler); 
+    app.use(errorHandler);
 
     app.all('*', (req, res) => {
         res.json({ message: 'unable to retrieve requested resource' });
