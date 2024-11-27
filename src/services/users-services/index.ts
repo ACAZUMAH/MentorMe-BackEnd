@@ -2,9 +2,9 @@ import User from "../../models/schemas/usersSchema";
 import createHttpError from "http-errors";
 import { Types } from "mongoose";
 import { userType } from "../types";
-import { validateAuthData } from "./validateUserData";
+import { validateAuthData, validateProfileData } from "./validateUserData";
 import { createAuth } from "../auth-services";
-import { hashPassword } from "../../helpers";
+import { hashPassword} from "../../helpers";
 
 /**
  * create a new user in the database with phone and 
@@ -14,7 +14,7 @@ import { hashPassword } from "../../helpers";
  */
 export const createUser = async (data: userType) => {
     await validateAuthData(data);
-    const hash = await hashPassword(data.password);
+    const hash = await hashPassword(data.password!);
     const user = await User.create({ ...data, password: hash});
     if(!user){
         throw new createHttpError.InternalServerError('Could not create user');
@@ -82,3 +82,24 @@ export const findUserByIdAndUpdate = async (id: string | Types.ObjectId, data: u
     }
     return user;
 };
+
+/**
+ * find a user by id and update the user's profile data
+ * @param id id of the user
+ * @param data data to be updated
+ * @returns updated user
+ * @throws 404 if no user found with the id
+ * @throws 400 if the id is invalid
+ */
+export const findUserByIdAndCreateProfile = async (id: string | Types.ObjectId, data: userType) => {
+    if (!Types.ObjectId.isValid(id)) {
+        throw new createHttpError.BadRequest('Invalid user id');
+    }
+    await validateProfileData(data);
+    const user = await User.findByIdAndUpdate({ _id: id}, { ...data }, { new: true });
+    if (!user) {
+        throw new createHttpError.NotFound('No user found with this id');
+    }
+    return user;
+}
+
