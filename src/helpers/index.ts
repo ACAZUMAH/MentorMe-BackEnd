@@ -1,9 +1,7 @@
 import bcrypt from "bcrypt";
 import jsonwebtoken from "jsonwebtoken";
 import { Types } from "mongoose";
-const util = require('util')
-
-
+import { Request, Response, NextFunction } from "express";
 
 /**
  *
@@ -31,7 +29,9 @@ export const comparePassword = async (password: string, hash: string) => {
 export const generateAccessToken = async (id: Types.ObjectId | string) => {
   const payload = { id };
   return jsonwebtoken.sign(
-
+    payload,
+    process.env.ACCESS_TOKEN_SECRET as string,
+    { expiresIn: "30d" }
   );
 };
 
@@ -72,22 +72,3 @@ export const generateOTP = async (len: number) => {
   return otp;
 };
 
-/**
- * Validates a JWT token and returns the user ID if the token is valid and not expired.
- * @param token JWT token string
- * @returns user ID if the token is valid, otherwise undefined
- */
-export const checkTokenIsValid = async (token: string) => {
-  let checkToken;
-  if (token && token.startsWith("bearer")) {
-    checkToken = token.split(" ")[1];
-  }
-  const decodedToken = await util.promisify(jsonwebtoken.verify)(
-    checkToken,
-    process.env.ACCESS_TOKEN_SECRET as string
-  );
-  const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-  if (decodedToken.exp > currentTime) {
-    return decodedToken.id;
-  }
-};

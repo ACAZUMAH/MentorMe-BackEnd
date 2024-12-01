@@ -8,7 +8,7 @@ import * as services from "../services/users-services/index";
  * @returns user's profile data after updating 
  * and false if unable to update
  */
-const createProfile = async (req: Request, res: Response) => {
+export const createProfile = async (req: Request, res: Response) => {
     const user: any = req.user;
     const userData = await services.findUserByIdAndUpdate(user._id, req.body);
     if(userData){
