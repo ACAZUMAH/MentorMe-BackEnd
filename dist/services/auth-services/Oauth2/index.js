@@ -36,17 +36,35 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-require('../services/auth-services/Oauth2/index');
 const passport_1 = __importDefault(require("passport"));
-const helpers_1 = require("../helpers");
-const auth = __importStar(require("../controllers/auth.controller"));
-const router = (0, express_1.Router)();
-router.get('/google', passport_1.default.authenticate('google', { scope: ['email', 'profile'] }));
-router.get('/google/redirect', passport_1.default.authenticate('google'), auth.googleAuth);
-router.post('/register', auth.createuser);
-router.post('/otp', auth.verifyOtp);
-router.post('/login', auth.login);
-router.post('/forget-password', auth.forgotPassword);
-router.post('/new-password', helpers_1.verifyAccessToken, auth.newPassword);
-exports.default = router;
+const passport_google_oauth2_1 = require("passport-google-oauth2");
+const User = __importStar(require("../../users-services"));
+passport_1.default.serializeUser((user, done) => {
+    done(null, user);
+});
+passport_1.default.deserializeUser(async (user, done) => {
+    const foundUser = await User.findUserByEmail(user.email);
+    return foundUser ? done(null, foundUser) : done(null, null);
+});
+exports.default = passport_1.default.use(new passport_google_oauth2_1.Strategy({
+    clientID: process.env.CLIENT_ID,
+    clientSecret: process.env.CLIENT_SECRET,
+    callbackURL: process.env.REDIRECT_URL,
+    scope: ['email', 'profile']
+}, async (_accessToken, _refreshToken, profile, done) => {
+    try {
+        const userExists = await User.findUserByEmail(profile.email);
+        if (userExists) {
+            return done(null, userExists);
+        }
+        const newUser = await User.createGoogleUser({
+            email: profile.email,
+            fullName: profile.displayName,
+            profile_url: profile.picture
+        });
+        return done(null, newUser);
+    }
+    catch (error) {
+        return done(error);
+    }
+}));

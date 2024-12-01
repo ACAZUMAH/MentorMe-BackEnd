@@ -1,4 +1,4 @@
-
+import { Types } from "mongoose";
 
 export interface userType {
     fullName?: string;

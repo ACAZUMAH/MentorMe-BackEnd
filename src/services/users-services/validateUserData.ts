@@ -31,7 +31,7 @@ export const validateAuthData = async (data: userType) => {
     if (!isValid) {
         const errors = validate.errors?.map(error => {
             return { key: error.instancePath, message: error.message };
-        })
+        });
         throw new createHttpError.BadRequest( JSON.stringify(errors) );
     };
 };
@@ -43,13 +43,7 @@ export const validateAuthData = async (data: userType) => {
 export const validateProfileData = async (data: userType) => {
     const ajv = new Ajv();
     addFormat(ajv);
-    ajv.addFormat('email', {
-        type: 'string',
-        validate: (value: string) => {
-            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-            return emailRegex.test(value);
-        }
-    });
+
     const schema = {
         type: 'object',
         properties: {
@@ -61,8 +55,7 @@ export const validateProfileData = async (data: userType) => {
             level: { type: 'string' },
             about: { type: 'string', maxLength: 250 },
             acadamicFields: { type: 'string' },
-        },
-        required: ['fullName', 'role'], 
+
     };
     const validate = ajv.compile(schema);
     const isValid = validate(data);

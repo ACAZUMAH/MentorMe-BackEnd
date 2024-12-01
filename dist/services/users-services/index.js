@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findUserByIdAndUpdate = exports.finduserByIdAndUpdateIsAuth = exports.getUserByPhone = exports.checkUserExists = exports.createUser = void 0;
+exports.findUserByIdAndDelete = exports.findUserByIdAndUpdate = exports.finduserByIdAndUpdateIsAuth = exports.getUserByPhone = exports.findUserByEmail = exports.checkUserExists = exports.createGoogleUser = exports.createUser = void 0;
 const usersSchema_1 = __importDefault(require("../../models/schemas/usersSchema"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const mongoose_1 = require("mongoose");
@@ -28,8 +28,23 @@ const createUser = async (data) => {
 };
 exports.createUser = createUser;
 /**
+ * create a new user in the database with google data for those signing in with google
+ * @param data required user data
+ * @returns created user
+ * @throws 500 if user could not be created
+ */
+const createGoogleUser = async (data) => {
+    const user = await usersSchema_1.default.create({ ...data });
+    if (!user) {
+        throw new http_errors_1.default.InternalServerError('Could not create user');
+    }
+    return user;
+};
+exports.createGoogleUser = createGoogleUser;
+/**
  * checks if a user already exists with the phone number
  * @param phone user's phone number
+ * @throws 409 if user already exists
  */
 const checkUserExists = async (phone) => {
     if (await usersSchema_1.default.exists({ phone })) {
@@ -39,13 +54,26 @@ const checkUserExists = async (phone) => {
 };
 exports.checkUserExists = checkUserExists;
 /**
+ * find a user from the database by email
+ * @param email user's email
+ * @returns found user
+ * @throws 404 if no user found with the email
+ */
+const findUserByEmail = async (email) => {
+    /*if(!await User.exists({ email })){
+        throw new createHttpError.NotFound('No user found with this email');
+    };*/
+    return await usersSchema_1.default.findOne({ email });
+};
+exports.findUserByEmail = findUserByEmail;
+/**
  * get a user by phone number
  * @param phone user phone number
  * @returns user
  */
 const getUserByPhone = async (phone) => {
     if (!await usersSchema_1.default.exists({ phone })) {
-        throw new http_errors_1.default.NotFound('No user found with this phone numbr');
+        throw new http_errors_1.default.NotFound('No user found with this phone number');
     }
     ;
     return await usersSchema_1.default.findOne({ phone });
@@ -82,6 +110,7 @@ const findUserByIdAndUpdate = async (id, data) => {
     if (!mongoose_1.Types.ObjectId.isValid(id)) {
         throw new http_errors_1.default.BadRequest('Invalid user id');
     }
+    await (0, validateUserData_1.validateProfileData)(data);
     const user = await usersSchema_1.default.findByIdAndUpdate({ _id: id }, { ...data }, { new: true });
     if (!user) {
         throw new http_errors_1.default.NotFound('No user found with this id');
@@ -89,3 +118,40 @@ const findUserByIdAndUpdate = async (id, data) => {
     return user;
 };
 exports.findUserByIdAndUpdate = findUserByIdAndUpdate;
+/**
+ * find a user by id and delete the user
+ * @param id id of the user
+ * @returns deleted user
+ * @throws 404 if no user found with the id
+ * @throws 400 if the id is invalid
+ */
+const findUserByIdAndDelete = async (id) => {
+    if (!mongoose_1.Types.ObjectId.isValid(id)) {
+        throw new http_errors_1.default.BadRequest('Invalid user id');
+    }
+    const user = await usersSchema_1.default.findByIdAndDelete({ _id: id });
+    if (!user) {
+        throw new http_errors_1.default.NotFound('No user found with this id');
+    }
+    return user;
+};
+exports.findUserByIdAndDelete = findUserByIdAndDelete;
+// /**
+//  * find a user by id and update the user's profile data
+//  * @param id id of the user
+//  * @param data data to be updated
+//  * @returns updated user
+//  * @throws 404 if no user found with the id
+//  * @throws 400 if the id is invalid
+//  */
+// export const findUserByIdAndCreateProfile = async (id: string | Types.ObjectId, data: userType) => {
+//     if (!Types.ObjectId.isValid(id)) {
+//         throw new createHttpError.BadRequest('Invalid user id');
+//     }
+//     await validateProfileData(data);
+//     const user = await User.findByIdAndUpdate({ _id: id}, { ...data }, { new: true });
+//     if (!user) {
+//         throw new createHttpError.NotFound('No user found with this id');
+//     }
+//     return user;
+// }

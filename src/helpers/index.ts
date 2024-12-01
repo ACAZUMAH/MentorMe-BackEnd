@@ -4,6 +4,7 @@ import { Types } from "mongoose";
 const util = require('util')
 
 
+
 /**
  *
  * @param password
@@ -30,10 +31,30 @@ export const comparePassword = async (password: string, hash: string) => {
 export const generateAccessToken = async (id: Types.ObjectId | string) => {
   const payload = { id };
   return jsonwebtoken.sign(
-    payload,
-    process.env.ACCESS_TOKEN_SECRET as string,
-    { expiresIn: "50d", }
+
   );
+};
+
+/**
+ * 
+ * @param req 
+ * @param res 
+ * @param next 
+ * @returns 
+ */
+export const verifyAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if(!token) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  jsonwebtoken.verify(token, process.env.ACCESS_TOKEN_SECRET as string, (err, user) => {
+    if(err) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    req.user = user;
+    next();
+  });
 };
 
 /**
