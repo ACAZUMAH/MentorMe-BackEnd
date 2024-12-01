@@ -14,8 +14,7 @@ import { hashPassword} from "../../helpers";
  */
 export const createUser = async (data: userType) => {
     await validateAuthData(data);
-    const hash = await hashPassword(data.password as string);
-    const user = await User.create({ ...data, password: hash });
+
     if(!user){
         throw new createHttpError.InternalServerError('Could not create user');
     }
@@ -113,40 +112,5 @@ export const findUserByIdAndUpdate = async (id: string | Types.ObjectId, data: u
 };
 
 /**
- * find a user by id and delete the user
- * @param id id of the user
- * @returns deleted user
- * @throws 404 if no user found with the id
- * @throws 400 if the id is invalid
- */
-export const findUserByIdAndDelete = async (id: string | Types.ObjectId) => {
-    if(!Types.ObjectId.isValid(id)){
-        throw new createHttpError.BadRequest('Invalid user id');
-    }
-    const user = await User.findByIdAndDelete({ _id: id });
-    if(!user){
-        throw new createHttpError.NotFound('No user found with this id');
-    }
-    return user;    
-};
 
-// /**
-//  * find a user by id and update the user's profile data
-//  * @param id id of the user
-//  * @param data data to be updated
-//  * @returns updated user
-//  * @throws 404 if no user found with the id
-//  * @throws 400 if the id is invalid
-//  */
-// export const findUserByIdAndCreateProfile = async (id: string | Types.ObjectId, data: userType) => {
-//     if (!Types.ObjectId.isValid(id)) {
-//         throw new createHttpError.BadRequest('Invalid user id');
-//     }
-//     await validateProfileData(data);
-//     const user = await User.findByIdAndUpdate({ _id: id}, { ...data }, { new: true });
-//     if (!user) {
-//         throw new createHttpError.NotFound('No user found with this id');
-//     }
-//     return user;
-// }
 

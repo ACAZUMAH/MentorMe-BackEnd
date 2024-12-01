@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import jsonwebtoken from "jsonwebtoken";
 import { Types } from "mongoose";
 const util = require('util')
-import { Request, Response, NextFunction } from "express";
+
 
 
 /**
@@ -31,9 +31,7 @@ export const comparePassword = async (password: string, hash: string) => {
 export const generateAccessToken = async (id: Types.ObjectId | string) => {
   const payload = { id };
   return jsonwebtoken.sign(
-    payload, 
-    process.env.ACCESS_TOKEN_SECRET as string, 
-    { expiresIn: "30d", }
+
   );
 };
 
