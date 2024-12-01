@@ -17,6 +17,7 @@ const createAuth = async (userId) => {
     if (!mongoose_1.Types.ObjectId.isValid(userId)) {
         throw new Error('Invalid user id');
     }
+    ;
     await authSchema_1.default.create({ userId });
     return true;
 };
