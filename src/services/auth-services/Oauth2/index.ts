@@ -25,7 +25,7 @@ export default passport.use(
                     return done(null, userExists);
                 }
                 const newUser = await User.createGoogleUser({
-                    email: profile.email,
+                    email: profile.email, 
                     fullName: profile.displayName,
                     profile_url: profile.picture
                 });

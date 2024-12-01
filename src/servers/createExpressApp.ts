@@ -18,7 +18,7 @@ const createExpressApp = async (): Promise<Application> => {
     app.use(passport.initialize());
     app.use(passport.session());    
     app.use(route);
-    app.use(errorHandler); 
+    app.use(errorHandler);
 
     app.all('*', (_req, res) => {
         return res.json({ message: 'unable to retrieve requested resource' });

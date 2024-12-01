@@ -19,5 +19,5 @@ export interface authType {
 };
 
 export {
-    
+
 };

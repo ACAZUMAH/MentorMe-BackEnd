@@ -11,7 +11,7 @@ import { NextFunction, Request, Response } from "express";
 const errorHandler = (err:any, req:Request, res:Response, next:NextFunction) => {
     console.log(err);
     if(err instanceof createHttpError.HttpError){
-        return res.status(err.statusCode).json({ errors: [{ message: err.message }] });
+        res.status(err.statusCode).json({ errors: [{ message: err.message }] });
     }
     return res.status(500).json({errors: [{ message: 'Internal Server Error' }]});
 };

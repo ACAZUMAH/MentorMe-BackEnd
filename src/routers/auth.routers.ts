@@ -26,7 +26,7 @@ router.post('/otp', auth.verifyOtp);
 
 router.post('/login', auth.login); 
 
-router.post('/forgot-password', auth.forgotPassword);  
+router.post('/forget-password', auth.forgotPassword);  
 
 router.post('/new-password', verifyAccessToken, auth.newPassword);
 
