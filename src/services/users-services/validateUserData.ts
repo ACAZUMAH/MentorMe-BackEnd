@@ -55,7 +55,8 @@ export const validateProfileData = async (data: userType) => {
             level: { type: 'string' },
             about: { type: 'string', maxLength: 250 },
             acadamicFields: { type: 'string' },
-
+            password: { type: 'string' },
+        }
     };
     const validate = ajv.compile(schema);
     const isValid = validate(data);

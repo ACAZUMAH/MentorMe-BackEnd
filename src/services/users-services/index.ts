@@ -14,7 +14,8 @@ import { hashPassword} from "../../helpers";
  */
 export const createUser = async (data: userType) => {
     await validateAuthData(data);
-
+    const hashedPassword = await hashPassword(data.password as string);
+    const user = await User.create({ ...data, password: hashedPassword });
     if(!user){
         throw new createHttpError.InternalServerError('Could not create user');
     }
@@ -112,5 +113,19 @@ export const findUserByIdAndUpdate = async (id: string | Types.ObjectId, data: u
 };
 
 /**
-
-
+ * find a user by id and delete the user
+ * @param id id of the user
+ * @returns deleted user
+ * @throws 404 if no user found with the id
+ * @throws 400 if the id is invalid
+ */
+export const findUserByIdAndDelete = async (id: string | Types.ObjectId) => {
+    if(!Types.ObjectId.isValid(id)){
+        throw new createHttpError.BadRequest('Invalid user id');
+    }
+    const user = await User.findByIdAndDelete({ _id: id });
+    if(!user){
+        throw new createHttpError.NotFound('No user found with this id');
+    }
+    return user;
+};
