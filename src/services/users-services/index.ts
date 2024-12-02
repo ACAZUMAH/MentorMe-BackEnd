@@ -1,4 +1,6 @@
 import User from "../../models/schemas/usersSchema";
+import Mentor from "../../models/schemas/mentors";
+import Mentee from "../../models/schemas/mentees";
 import createHttpError from "http-errors";
 import { Types } from "mongoose";
 import { userType } from "../types";
@@ -129,3 +131,22 @@ export const findUserByIdAndDelete = async (id: string | Types.ObjectId) => {
     }
     return user;
 };
+
+export const getMyMentorMentee = async (id: string | Types.ObjectId) => {
+
+    if (!Types.ObjectId.isValid(id)) {
+        throw new createHttpError.BadRequest('Invalid user id');
+    }
+    const user = await User.findById(id);
+    console.log(user);
+    const role = user?.role;
+    let list;
+    if(role == 'mentor'){
+        list = await Mentor.findOne({ mentorID: id });
+    }
+    if(role == 'mentee'){
+        list = await Mentee.findOne({menteeID: id});
+    }
+    console.log(list);
+    return list;
+}

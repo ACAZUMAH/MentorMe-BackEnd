@@ -3,6 +3,7 @@ import * as user from "../controllers/user.controller";
 
 const router = Router();
 
-router.post('/profile', user.createProfile);
+router.patch('/profile', user.updateProfile);
+router.get("/my-mentor-mentee", user.getMyMentorMentee)
 
 export default router;
