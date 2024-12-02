@@ -3,7 +3,6 @@ import * as user from "../controllers/user.controller";
 
 const router = Router();
 
-router.post('/profile', user.createprofile);
-
+router.post('/profile', user.createProfile);
 
 export default router;

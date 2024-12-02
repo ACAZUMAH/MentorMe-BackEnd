@@ -12,7 +12,7 @@ import { authType } from "../types";
 export const createAuth = async(userId: string | Types.ObjectId) => {
     if(!Types.ObjectId.isValid(userId)){
         throw new Error('Invalid user id');
-    }
+    };
     await Auth.create({ userId });
     return true;
 };
@@ -37,7 +37,7 @@ export const findAuthAndUpdate = async (id: string | Types.ObjectId, updateData:
         throw new Error('Invalid user id');
     };
     return await Auth.findOneAndUpdate({ userId: id }, { ...updateData });
-}
+};
 
 /**
  * 

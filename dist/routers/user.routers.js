@@ -32,21 +32,10 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-require('../services/auth-services/Oauth2/index');
-const passport_1 = __importDefault(require("passport"));
+const user = __importStar(require("../controllers/user.controller"));
 const helpers_1 = require("../helpers");
-const auth = __importStar(require("../controllers/auth.controller"));
 const router = (0, express_1.Router)();
-router.get('/google', passport_1.default.authenticate('google', { scope: ['email', 'profile'] }));
-router.get('/google/redirect', passport_1.default.authenticate('google'), auth.googleAuth);
-router.post('/register', auth.createuser);
-router.post('/otp', auth.verifyOtp);
-router.post('/login', auth.login);
-router.post('/forget-password', auth.forgotPassword);
-router.post('/new-password', helpers_1.verifyAccessToken, auth.newPassword);
+router.post('/profile', helpers_1.verifyAccessToken, user.createprofile);
 exports.default = router;

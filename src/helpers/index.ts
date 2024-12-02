@@ -1,8 +1,7 @@
 import bcrypt from "bcrypt";
 import jsonwebtoken from "jsonwebtoken";
 import { Types } from "mongoose";
-const util = require('util')
-
+import { Request, Response, NextFunction } from "express";
 
 /**
  *
@@ -32,8 +31,30 @@ export const generateAccessToken = async (id: Types.ObjectId | string) => {
   return jsonwebtoken.sign(
     payload,
     process.env.ACCESS_TOKEN_SECRET as string,
-    { expiresIn: "50d", }
+    { expiresIn: "30d" }
   );
+};
+
+/**
+ * 
+ * @param req 
+ * @param res 
+ * @param next 
+ * @returns 
+ */
+export const verifyAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if(!token) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+  jsonwebtoken.verify(token, process.env.ACCESS_TOKEN_SECRET as string, (err, user) => {
+    if(err) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+    req.user = user;
+    next();
+  });
 };
 
 /**
@@ -51,22 +72,3 @@ export const generateOTP = async (len: number) => {
   return otp;
 };
 
-/**
- * Validates a JWT token and returns the user ID if the token is valid and not expired.
- * @param token JWT token string
- * @returns user ID if the token is valid, otherwise undefined
- */
-export const checkTokenIsValid = async (token: string) => {
-  let checkToken;
-  if (token && token.startsWith("bearer")) {
-    checkToken = token.split(" ")[1];
-  }
-  const decodedToken = await util.promisify(jsonwebtoken.verify)(
-    checkToken,
-    process.env.ACCESS_TOKEN_SECRET as string
-  );
-  const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-  if (decodedToken.exp > currentTime) {
-    return decodedToken.id;
-  }
-};
