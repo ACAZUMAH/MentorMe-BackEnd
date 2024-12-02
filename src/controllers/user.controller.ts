@@ -10,9 +10,9 @@ import * as services from "../services/users-services/index";
  */
 export const createProfile = async (req: Request, res: Response) => {
     const user: any = req.user;
-    const userData = await services.findUserByIdAndUpdate(user._id, req.body);
+    const userData = await services.findUserByIdAndUpdate(user.id, req.body);
     if(userData){
-        res.status(200).json({ success: true, data: userData });
+        return res.status(200).json({ success: true, data: userData });
     }
     return res.status(400).json({ success: false, message: 'Unable to update profile' });
 };
