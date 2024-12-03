@@ -3,9 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateOTP = exports.verifyAccessToken = exports.generateAccessToken = exports.comparePassword = exports.hashPassword = void 0;
+exports.generateOTP = exports.verifyAccessToken = exports.generateAccessToken = exports.comparePassword = exports.hashPassword = exports.blacklistedTokens = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const blacklist_1 = require("../services/blacklistedTokens/blacklist");
+exports.blacklistedTokens = new Set();
 /**
  *
  * @param password
@@ -43,11 +45,16 @@ exports.generateAccessToken = generateAccessToken;
  * @returns
  */
 const verifyAccessToken = async (req, res, next) => {
-    const authHeader = req.headers['authorization'];
+    const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) {
         return res.status(401).json({ message: "Unauthorized" });
     }
+    ;
+    if (await (0, blacklist_1.isTokenBlacklisted)(token)) {
+        return res.status(403).json({ message: "Forbidden" });
+    }
+    ;
     jsonwebtoken_1.default.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
         if (err) {
             return res.status(403).json({ message: "Forbidden" });

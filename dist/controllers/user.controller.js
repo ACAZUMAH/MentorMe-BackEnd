@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createProfile = void 0;
+exports.getMyMentorMentee = exports.deleteUser = exports.updateProfile = void 0;
 const services = __importStar(require("../services/users-services/index"));
 /**
  * update a user's profile data by id
@@ -42,12 +42,37 @@ const services = __importStar(require("../services/users-services/index"));
  * @returns user's profile data after updating
  * and false if unable to update
  */
-const createProfile = async (req, res) => {
+const updateProfile = async (req, res) => {
     const user = req.user;
     const userData = await services.findUserByIdAndUpdate(user.id, req.body);
+    const data = await services.findUserById(user.id);
     if (userData) {
-        return res.status(200).json({ success: true, data: userData });
+        return res.status(200).json({ success: true, data: data });
     }
     return res.status(400).json({ success: false, message: 'Unable to update profile' });
 };
-exports.createProfile = createProfile;
+exports.updateProfile = updateProfile;
+/**
+ * delete a user by id
+ * @param req Request object
+ * @param res Response object
+ * @returns deleted user's profile data
+ */
+const deleteUser = async (req, res) => {
+    const user = req.user;
+    const data = await services.findUserByIdAndDelete(user.id);
+    if (data) {
+        return res.status(200).json({ success: true, data: data });
+    }
+    return res.status(400).json({ success: false, message: 'Unable to delete user' });
+};
+exports.deleteUser = deleteUser;
+const getMyMentorMentee = async (req, res) => {
+    const user = req.user;
+    const data = await services.getMyMentorMentee(user.id);
+    if (data) {
+        return res.status(200).json({ success: true, data: data });
+    }
+    return res.status(400).json({ success: false, message: `Could not get data` });
+};
+exports.getMyMentorMentee = getMyMentorMentee;

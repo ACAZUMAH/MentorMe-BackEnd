@@ -33,11 +33,12 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.newPassword = exports.forgotPassword = exports.login = exports.verifyOtp = exports.createUser = exports.googleAuth = void 0;
+exports.logOut = exports.newPassword = exports.forgotPassword = exports.login = exports.verifyOtp = exports.createUser = exports.googleAuth = void 0;
 const services = __importStar(require("../services/users-services/index"));
 const verifyAndSend_1 = require("../services/auth-services/verifyAndSend");
 const index_1 = require("../services/auth-services/index");
 const helpers = __importStar(require("../helpers"));
+const blacklist_1 = require("../services/blacklistedTokens/blacklist");
 /**
  * controller for google authentication
  * @param req Request object
@@ -133,3 +134,17 @@ const newPassword = async (req, res) => {
     return res.status(200).json({ success: true, message: "Password updated successfully" });
 };
 exports.newPassword = newPassword;
+/**
+ * controller for logging out a user
+ * @param req Request object
+ * @param res Response object
+ * @returns response message
+ */
+const logOut = async (req, res) => {
+    const user = req.user;
+    await services.findUserByIdAndUpdate(user.id, { isAuthenticated: false });
+    const token = req.headers.authorization?.split(' ')[1];
+    await (0, blacklist_1.blacklistToken)(token);
+    return res.status(200).json({ success: true, message: "Logged out successfully" });
+};
+exports.logOut = logOut;

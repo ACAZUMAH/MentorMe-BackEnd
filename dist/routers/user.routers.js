@@ -44,10 +44,11 @@ const user = __importStar(require("../controllers/user.controller"));
 const router = (0, express_1.Router)();
 /**
  * @swagger
- * /user/profile:
+ * user/profile:
  *   post:
  *     summary: Update user's profile data.
- *     tags: [User Management]
+ *     tags:
+ *       - User
  *     description: Updates a user's profile data using their ID. Returns the updated profile data if successful or an error message if the update fails.
  *     security:
  *       - bearerAuth: []
@@ -128,5 +129,7 @@ const router = (0, express_1.Router)();
  *                   type: string
  *                   example: "Internal server error."
  */
-router.post('/profile', user.createProfile);
+router.post('/profile', user.updateProfile);
+router.delete('/delete', user.deleteUser);
+router.get("/my-mentor-mentee", user.getMyMentorMentee);
 exports.default = router;
