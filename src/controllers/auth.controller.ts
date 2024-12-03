@@ -4,6 +4,7 @@ import { generateOtpAndSendSms, verifyOtpAndGenerateToken }
 from "../services/auth-services/verifyAndSend";
 import { createAuth } from "../services/auth-services/index";
 import * as helpers from "../helpers";
+import { blacklistToken } from "../services/blacklistedTokens/blacklist";
 
 /**
  * controller for google authentication
@@ -26,7 +27,7 @@ export const googleAuth = async (req: Request, res: Response) => {
  * @param res Response object
  * @returns response message 
  */
-export const createuser = async (req: Request, res: Response) => {
+export const createUser = async (req: Request, res: Response) => {
   const { phone, password } = req.body;
   await services.checkUserExists(phone);
   const user = await services.createUser({ phone, password });
@@ -82,11 +83,30 @@ export const forgotPassword = async (req: Request, res: Response) => {
     };
 };
 
-
+/**
+ * controller for updating user password
+ * @param req Request object
+ * @param res Response object
+ * @returns response message
+ */
 export const newPassword = async (req: Request, res: Response) => {
     const { password } = req.body;
     const user: any = req.user;
     const hash = await helpers.hashPassword(password);
     await services.findUserByIdAndUpdate(user.id, { password: hash });
     return res.status(200).json({ success: true, message: "Password updated successfully" });
+};
+
+/**
+ * controller for logging out a user
+ * @param req Request object
+ * @param res Response object
+ * @returns response message
+ */
+export const logOut = async (req: Request, res: Response) => {
+    const user: any = req.user;
+    await services.findUserByIdAndUpdate(user.id, { isAuthenticated: false });
+    const token = req.headers.authorization?.split(' ')[1];
+    await blacklistToken(token as string);
+    return res.status(200).json({ success: true, message: "Logged out successfully" });
 };

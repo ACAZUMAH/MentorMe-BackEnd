@@ -18,8 +18,8 @@ const helpers_1 = require("../../helpers");
  */
 const createUser = async (data) => {
     await (0, validateUserData_1.validateAuthData)(data);
-    const hash = await (0, helpers_1.hashPassword)(data.password);
-    const user = await usersSchema_1.default.create({ ...data, password: hash });
+    const hashedPassword = await (0, helpers_1.hashPassword)(data.password);
+    const user = await usersSchema_1.default.create({ ...data, password: hashedPassword });
     if (!user) {
         throw new http_errors_1.default.InternalServerError('Could not create user');
     }
@@ -136,22 +136,3 @@ const findUserByIdAndDelete = async (id) => {
     return user;
 };
 exports.findUserByIdAndDelete = findUserByIdAndDelete;
-// /**
-//  * find a user by id and update the user's profile data
-//  * @param id id of the user
-//  * @param data data to be updated
-//  * @returns updated user
-//  * @throws 404 if no user found with the id
-//  * @throws 400 if the id is invalid
-//  */
-// export const findUserByIdAndCreateProfile = async (id: string | Types.ObjectId, data: userType) => {
-//     if (!Types.ObjectId.isValid(id)) {
-//         throw new createHttpError.BadRequest('Invalid user id');
-//     }
-//     await validateProfileData(data);
-//     const user = await User.findByIdAndUpdate({ _id: id}, { ...data }, { new: true });
-//     if (!user) {
-//         throw new createHttpError.NotFound('No user found with this id');
-//     }
-//     return user;
-// }

@@ -3,10 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkTokenIsValid = exports.generateOTP = exports.verifyAccessToken = exports.generateAccessToken = exports.comparePassword = exports.hashPassword = void 0;
+exports.generateOTP = exports.verifyAccessToken = exports.generateAccessToken = exports.comparePassword = exports.hashPassword = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const util = require('util');
 /**
  *
  * @param password
@@ -33,7 +32,7 @@ exports.comparePassword = comparePassword;
  */
 const generateAccessToken = async (id) => {
     const payload = { id };
-    return jsonwebtoken_1.default.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "30d", });
+    return jsonwebtoken_1.default.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "30d" });
 };
 exports.generateAccessToken = generateAccessToken;
 /**
@@ -73,20 +72,3 @@ const generateOTP = async (len) => {
     return otp;
 };
 exports.generateOTP = generateOTP;
-/**
- * Validates a JWT token and returns the user ID if the token is valid and not expired.
- * @param token JWT token string
- * @returns user ID if the token is valid, otherwise undefined
- */
-const checkTokenIsValid = async (token) => {
-    let checkToken;
-    if (token && token.startsWith("bearer")) {
-        checkToken = token.split(" ")[1];
-    }
-    const decodedToken = await util.promisify(jsonwebtoken_1.default.verify)(checkToken, process.env.ACCESS_TOKEN_SECRET);
-    const currentTime = Math.floor(Date.now() / 1000); // Current time in seconds
-    if (decodedToken.exp > currentTime) {
-        return decodedToken.id;
-    }
-};
-exports.checkTokenIsValid = checkTokenIsValid;
