@@ -33,20 +33,21 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createprofile = void 0;
+exports.createProfile = void 0;
 const services = __importStar(require("../services/users-services/index"));
 /**
- * Create a user profile
+ * update a user's profile data by id
  * @param req Request object
  * @param res Response object
- * @returns response message
+ * @returns user's profile data after updating
+ * and false if unable to update
  */
-const createprofile = async (req, res) => {
+const createProfile = async (req, res) => {
     const user = req.user;
-    const profile = await services.findUserByIdAndUpdate(user.id, { ...req.body });
-    if (!profile) {
-        return res.status(404).json({ message: "User not found" });
+    const userData = await services.findUserByIdAndUpdate(user.id, req.body);
+    if (userData) {
+        return res.status(200).json({ success: true, data: userData });
     }
-    return res.status(201).json({ profile });
+    return res.status(400).json({ success: false, message: 'Unable to update profile' });
 };
-exports.createprofile = createprofile;
+exports.createProfile = createProfile;

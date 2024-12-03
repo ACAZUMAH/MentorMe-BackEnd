@@ -2,6 +2,10 @@ import bcrypt from "bcrypt";
 import jsonwebtoken from "jsonwebtoken";
 import { Types } from "mongoose";
 import { Request, Response, NextFunction } from "express";
+import { isTokenBlacklisted } from "../services/blacklistedTokens/blacklist";
+
+
+export const blacklistedTokens = new Set<string>();
 
 /**
  *
@@ -43,11 +47,14 @@ export const generateAccessToken = async (id: Types.ObjectId | string) => {
  * @returns 
  */
 export const verifyAccessToken = async (req: Request, res: Response, next: NextFunction) => {
-  const authHeader = req.headers['authorization'];
+  const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
   if(!token) {
     return res.status(401).json({ message: "Unauthorized" });
-  }
+  };
+  if(await isTokenBlacklisted(token)) {
+    return res.status(403).json({ message: "Forbidden" });
+  };
   jsonwebtoken.verify(token, process.env.ACCESS_TOKEN_SECRET as string, (err, user) => {
     if(err) {
       return res.status(403).json({ message: "Forbidden" });

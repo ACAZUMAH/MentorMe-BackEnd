@@ -1,12 +1,14 @@
 import http from "http";
 import createExpressApp from "./createExpressApp";
 import connectDB from "../models/connect";
+import client from "../models/connect/redis";
 
 /**
  * create the http server here and start the server
  */
 export const startServer = async () => {
     await connectDB(process.env.DATABASE_URL as string);
+    await client.connect();
     const app = await createExpressApp();
 
     const server = http.createServer(app);

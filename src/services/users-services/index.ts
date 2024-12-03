@@ -51,6 +51,21 @@ export const checkUserExists = async (phone: string) => {
 };
 
 /**
+ * find a user from the database by id
+ * @param id user's id
+ * @returns found user
+ * @throws 404 if no user found with the id
+ * @throws 400 if the id is invalid
+ */
+export const findUserById = async (id: string | Types.ObjectId) => {
+    if(!Types.ObjectId.isValid(id)){
+        throw new createHttpError.BadRequest('Invalid user id');
+    }
+    const user = await User.findById({ _id: id }, { password: 0, __v: 0 });
+    return user;
+};
+
+/**
  * find a user from the database by email
  * @param email user's email
  * @returns found user
@@ -105,13 +120,13 @@ export const finduserByIdAndUpdateIsAuth = async (id: string | Types.ObjectId) =
 export const findUserByIdAndUpdate = async (id: string | Types.ObjectId, data: userType) => {
     if(!Types.ObjectId.isValid(id)){
         throw new createHttpError.BadRequest('Invalid user id');
-    }
+    };
     await validateProfileData(data);
     const user = await User.findByIdAndUpdate({ _id: id }, { ...data }, { new: true });
     if(!user){
         throw new createHttpError.NotFound('No user found with this id');
-    }
-    return user;
+    };
+    return true;
 };
 
 /**
@@ -124,11 +139,11 @@ export const findUserByIdAndUpdate = async (id: string | Types.ObjectId, data: u
 export const findUserByIdAndDelete = async (id: string | Types.ObjectId) => {
     if(!Types.ObjectId.isValid(id)){
         throw new createHttpError.BadRequest('Invalid user id');
-    }
+    };
     const user = await User.findByIdAndDelete({ _id: id });
     if(!user){
         throw new createHttpError.NotFound('No user found with this id');
-    }
+    };
     return user;
 };
 
@@ -138,7 +153,6 @@ export const getMyMentorMentee = async (id: string | Types.ObjectId) => {
         throw new createHttpError.BadRequest('Invalid user id');
     }
     const user = await User.findById(id);
-    console.log(user);
     const role = user?.role;
     let list;
     if(role == 'mentor'){
@@ -147,6 +161,5 @@ export const getMyMentorMentee = async (id: string | Types.ObjectId) => {
     if(role == 'mentee'){
         list = await Mentee.findOne({menteeID: id});
     }
-    console.log(list);
     return list;
 }

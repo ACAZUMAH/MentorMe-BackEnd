@@ -5,7 +5,7 @@ import session from 'express-session';
 import route from '../routers';
 import errorHandler from '../middlewares/error-Handler';
 import passport from 'passport';
-
+import setUpSwagger from '../docs';
 
 const createExpressApp = async (): Promise<Application> => {
     const app = express();
@@ -18,8 +18,8 @@ const createExpressApp = async (): Promise<Application> => {
     app.use(passport.initialize());
     app.use(passport.session());    
     app.use(route);
+    await setUpSwagger(app);
     app.use(errorHandler);
-
     app.all('*', (_req, res) => {
         return res.json({ message: 'unable to retrieve requested resource' });
     });

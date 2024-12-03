@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.newPassword = exports.forgotPassword = exports.login = exports.verifyOtp = exports.createuser = exports.googleAuth = void 0;
+exports.newPassword = exports.forgotPassword = exports.login = exports.verifyOtp = exports.createUser = exports.googleAuth = void 0;
 const services = __importStar(require("../services/users-services/index"));
 const verifyAndSend_1 = require("../services/auth-services/verifyAndSend");
 const index_1 = require("../services/auth-services/index");
@@ -60,7 +60,7 @@ exports.googleAuth = googleAuth;
  * @param res Response object
  * @returns response message
  */
-const createuser = async (req, res) => {
+const createUser = async (req, res) => {
     const { phone, password } = req.body;
     await services.checkUserExists(phone);
     const user = await services.createUser({ phone, password });
@@ -71,7 +71,7 @@ const createuser = async (req, res) => {
     }
     ;
 };
-exports.createuser = createuser;
+exports.createUser = createUser;
 /**
  * controller for verifying otp code and generating access token
  * @param req Request object
@@ -119,6 +119,12 @@ const forgotPassword = async (req, res) => {
     ;
 };
 exports.forgotPassword = forgotPassword;
+/**
+ * controller for updating user password
+ * @param req Request object
+ * @param res Response object
+ * @returns response message
+ */
 const newPassword = async (req, res) => {
     const { password } = req.body;
     const user = req.user;

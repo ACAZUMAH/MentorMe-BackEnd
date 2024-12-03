@@ -11,11 +11,12 @@ export interface userType {
     about?: string;
     acadamicFields?: string;
     password?: string;
+    isAuthenticated?: boolean;
 };
 
 export interface authType {
     code: string;
-    expiresIn: Date
+    expiresIn: Date;
 };
 
 export interface queryType {
