@@ -390,4 +390,5 @@ router.post('/forget-password', auth.forgotPassword);
  *                   example: "Internal server error."
  */
 router.post('/new-password', helpers_1.verifyAccessToken, auth.newPassword);
+router.get('/logout', helpers_1.verifyAccessToken, auth.logOut);
 exports.default = router;

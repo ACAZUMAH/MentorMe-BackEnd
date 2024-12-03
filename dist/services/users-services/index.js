@@ -3,8 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findUserByIdAndDelete = exports.findUserByIdAndUpdate = exports.finduserByIdAndUpdateIsAuth = exports.getUserByPhone = exports.findUserByEmail = exports.checkUserExists = exports.createGoogleUser = exports.createUser = void 0;
+exports.getMyMentorMentee = exports.findUserByIdAndDelete = exports.findUserByIdAndUpdate = exports.finduserByIdAndUpdateIsAuth = exports.getUserByPhone = exports.findUserByEmail = exports.findUserById = exports.checkUserExists = exports.createGoogleUser = exports.createUser = void 0;
 const usersSchema_1 = __importDefault(require("../../models/schemas/usersSchema"));
+const mentors_1 = __importDefault(require("../../models/schemas/mentors"));
+const mentees_1 = __importDefault(require("../../models/schemas/mentees"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const mongoose_1 = require("mongoose");
 const validateUserData_1 = require("./validateUserData");
@@ -53,6 +55,21 @@ const checkUserExists = async (phone) => {
     ;
 };
 exports.checkUserExists = checkUserExists;
+/**
+ * find a user from the database by id
+ * @param id user's id
+ * @returns found user
+ * @throws 404 if no user found with the id
+ * @throws 400 if the id is invalid
+ */
+const findUserById = async (id) => {
+    if (!mongoose_1.Types.ObjectId.isValid(id)) {
+        throw new http_errors_1.default.BadRequest('Invalid user id');
+    }
+    const user = await usersSchema_1.default.findById({ _id: id }, { password: 0, __v: 0 });
+    return user;
+};
+exports.findUserById = findUserById;
 /**
  * find a user from the database by email
  * @param email user's email
@@ -110,12 +127,14 @@ const findUserByIdAndUpdate = async (id, data) => {
     if (!mongoose_1.Types.ObjectId.isValid(id)) {
         throw new http_errors_1.default.BadRequest('Invalid user id');
     }
+    ;
     await (0, validateUserData_1.validateProfileData)(data);
     const user = await usersSchema_1.default.findByIdAndUpdate({ _id: id }, { ...data }, { new: true });
     if (!user) {
         throw new http_errors_1.default.NotFound('No user found with this id');
     }
-    return user;
+    ;
+    return true;
 };
 exports.findUserByIdAndUpdate = findUserByIdAndUpdate;
 /**
@@ -129,10 +148,28 @@ const findUserByIdAndDelete = async (id) => {
     if (!mongoose_1.Types.ObjectId.isValid(id)) {
         throw new http_errors_1.default.BadRequest('Invalid user id');
     }
+    ;
     const user = await usersSchema_1.default.findByIdAndDelete({ _id: id });
     if (!user) {
         throw new http_errors_1.default.NotFound('No user found with this id');
     }
+    ;
     return user;
 };
 exports.findUserByIdAndDelete = findUserByIdAndDelete;
+const getMyMentorMentee = async (id) => {
+    if (!mongoose_1.Types.ObjectId.isValid(id)) {
+        throw new http_errors_1.default.BadRequest('Invalid user id');
+    }
+    const user = await usersSchema_1.default.findById(id);
+    const role = user?.role;
+    let list;
+    if (role == 'mentor') {
+        list = await mentors_1.default.findOne({ mentorID: id });
+    }
+    if (role == 'mentee') {
+        list = await mentees_1.default.findOne({ menteeID: id });
+    }
+    return list;
+};
+exports.getMyMentorMentee = getMyMentorMentee;
