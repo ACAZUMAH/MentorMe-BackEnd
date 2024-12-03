@@ -18,6 +18,17 @@ export interface authType {
     expiresIn: Date
 };
 
+export interface queryType {
+    role: string;
+    id?: string | Types.ObjectId;
+    fullName?: string | object;
+    programmeOfStudy?: string | object;
+    level?: string;
+    sort?: string;
+    page?: number;
+    limit?: number;
+};
+
 export {
 
 };
