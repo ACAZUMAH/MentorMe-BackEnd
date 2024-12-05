@@ -8,7 +8,6 @@ const index_1 = require("./index");
 const http_errors_1 = __importDefault(require("http-errors"));
 const users_services_1 = require("../users-services");
 const helpers_1 = require("../../helpers");
-const send_Sms_1 = __importDefault(require("./send-Sms"));
 /**
  * generate otp and send sms to the user
  * @param id user's id
@@ -24,7 +23,7 @@ const generateOtpAndSendSms = async (id, phone) => {
     const ExpiresIn = new Date(Date.now() + 1 * 60 * 1000);
     await (0, index_1.findAuthAndUpdate)(id, { code: otp, expiresIn: ExpiresIn });
     const sms = `Your verification code is: ${otp}`;
-    await (0, send_Sms_1.default)(phone, sms);
+    //await sendSms(phone, sms);
     return true;
 };
 exports.generateOtpAndSendSms = generateOtpAndSendSms;

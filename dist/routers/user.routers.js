@@ -132,4 +132,5 @@ const router = (0, express_1.Router)();
 router.post('/profile', user.updateProfile);
 router.delete('/delete', user.deleteUser);
 router.get("/my-mentor-mentee", user.getMyMentorMentee);
+router.get('/mentors-mentees', user.getAllMentorsOrMentees);
 exports.default = router;

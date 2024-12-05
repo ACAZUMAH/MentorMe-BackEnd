@@ -4,9 +4,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
-const mentorschema = new mongoose_1.default.Schema({
+const mentorshipRequestSchema = new mongoose_1.default.Schema({
     mentorId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' },
-    mentees: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Mentee' }]
+    menteeId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' },
+    status: { type: String, default: 'pending' }
 }, { timestamps: true });
-const mentor = mongoose_1.default.model('Mentor', mentorschema);
-exports.default = mentor;
+const mentorshipRequest = mongoose_1.default.model('MentorshipRequest', mentorshipRequestSchema);
+exports.default = mentorshipRequest;
