@@ -46,7 +46,7 @@ export const addMentee = async (ids: idType) => {
     return true;
 };
 
-export const getMentors = async (id: string | Types.ObjectId) => {
+export const getMentees = async (id: string | Types.ObjectId) => {
     if (!Types.ObjectId.isValid(id)) {
         throw new createHttpError.BadRequest('Invalid user id');
     }
@@ -55,6 +55,9 @@ export const getMentors = async (id: string | Types.ObjectId) => {
     if (role != 'mentor') {
         return new createHttpError.BadRequest("You are not a mentor");
     }
-    const list = await mentor.findOne({ menteeID: id });
-    return list;
+    const data = await mentor.findOne({ mentorID: id });
+    const list = data?.mentees;
+    const result = await User.find({ _id: { $in: list } });
+    // console.log("result ",result);
+    return result;
 };

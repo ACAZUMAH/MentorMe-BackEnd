@@ -58,6 +58,8 @@ export const getMentors = async (id: string | Types.ObjectId) => {
     if (role != 'mentee') {
         return new createHttpError.BadRequest("You are not a mentee");
     }
-    const list = await mentee.findOne({ menteeID: id });
-    return list;
+    let data = await mentee.findOne({ menteeID: id });
+    const list = data?.mentors;
+    const result = await User.find({ _id: { $in: list } });
+    return result;
 };

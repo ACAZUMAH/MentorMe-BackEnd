@@ -54,3 +54,14 @@ export const rejectRequest = async (req: Request, res: Response) => {
     }
     return res.status(200).json({ success: true, data: data });
 };
+
+export const getMentees = async (req: Request, res: Response) => {
+    const user: any = req.user;
+    // console.log("user info ",user)
+    const data = await mentor.getMentees(user.id);
+    // console.log(data);
+    if (data) {
+        return res.status(200).json({ success: true, data: data });
+    }
+    return res.status(400).json({ success: false, message: `Could not get data` });
+}
