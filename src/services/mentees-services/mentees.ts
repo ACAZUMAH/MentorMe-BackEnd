@@ -47,3 +47,17 @@ export const addMentor = async (ids: idType) => {
     };
     return true;
 };
+
+export const getMentors = async (id: string | Types.ObjectId) => {
+    if (!Types.ObjectId.isValid(id)) {
+        throw new createHttpError.BadRequest('Invalid user id');
+    }
+    const user = await User.findById(id);
+    const role = user?.role;
+    
+    if (role != 'mentee') {
+        return new createHttpError.BadRequest("You are not a mentee");
+    }
+    const list = await mentee.findOne({ menteeID: id });
+    return list;
+};

@@ -33,3 +33,12 @@ export const getMenteeRequests = async (req: Request, res: Response) => {
     };
     return res.status(200).json({ success: true, data: data });
 };
+
+export const getMentors = async (req: Request, res: Response) => {
+    const user: any = req.user;
+    const data = await mentees.getMentors(user.id);
+    if (data) {
+        return res.status(200).json({ success: true, data: data });
+    }
+    return res.status(400).json({ success: false, message: `Could not get data` });
+}
