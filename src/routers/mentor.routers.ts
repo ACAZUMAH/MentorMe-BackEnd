@@ -3,6 +3,10 @@ import * as mentorme from "../controllers/mentors.controller";
 
 const router = Router();
 
-router.get('/mentorsmentees', mentorme.getAllMentorsAndMentees);
+router.get('/requests', mentorme.getMentorshipRequests);
+
+router.post('/accept/:id', mentorme.acceptRequest);
+
+router.post('/reject/:id', mentorme.rejectRequest);
 
 export default router;
