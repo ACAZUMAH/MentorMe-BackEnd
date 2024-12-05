@@ -17,7 +17,7 @@ const sendSms = async (phone, message) => {
             "key": apiKey,
             "msisdn": `${phoneFormat}, 233xxxxxxxx`,
             "message": message,
-            "sender_id": "findjobs",
+            "sender_id": "MentorMe",
         })
     });
     if (!response.ok) {

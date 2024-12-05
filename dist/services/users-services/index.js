@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMyMentorMentee = exports.findUserByIdAndDelete = exports.findUserByIdAndUpdate = exports.finduserByIdAndUpdateIsAuth = exports.getUserByPhone = exports.findUserByEmail = exports.findUserById = exports.checkUserExists = exports.createGoogleUser = exports.createUser = void 0;
+exports.getMyMentorMentee = exports.findAllMentorsOrMentees = exports.findUserByIdAndDelete = exports.findUserByIdAndUpdate = exports.finduserByIdAndUpdateIsAuth = exports.getUserByPhone = exports.findUserByEmail = exports.findUserById = exports.checkUserExists = exports.createGoogleUser = exports.createUser = void 0;
 const usersSchema_1 = __importDefault(require("../../models/schemas/usersSchema"));
 const mentors_1 = __importDefault(require("../../models/schemas/mentors"));
 const mentees_1 = __importDefault(require("../../models/schemas/mentees"));
@@ -12,6 +12,7 @@ const mongoose_1 = require("mongoose");
 const validateUserData_1 = require("./validateUserData");
 const auth_services_1 = require("../auth-services");
 const helpers_1 = require("../../helpers");
+const filter_1 = __importDefault(require("../filters/filter"));
 /**
  * create a new user in the database with phone and
  * password, then create an auth record
@@ -157,6 +158,30 @@ const findUserByIdAndDelete = async (id) => {
     return user;
 };
 exports.findUserByIdAndDelete = findUserByIdAndDelete;
+/**
+ * find a user from the databaase by role and filter
+ *  by fullName, programmeOfStudy, level and sort them
+ * @param query query object
+ * @returns result of the query
+ */
+const findAllMentorsOrMentees = async (query) => {
+    const { page, limit } = query;
+    const queryObject = await (0, filter_1.default)(query);
+    let result = usersSchema_1.default.find(queryObject);
+    if (query.sort) {
+        const sortArray = query.sort.split(',').join(' ');
+        result = result.sort(sortArray);
+    }
+    else {
+        result = result.sort('fullName');
+    }
+    const pages = Number(page) || 1;
+    const limits = Number(limit) || 10;
+    const skip = (pages - 1) * limits;
+    result = result.skip(skip).limit(limits);
+    return await result;
+};
+exports.findAllMentorsOrMentees = findAllMentorsOrMentees;
 const getMyMentorMentee = async (id) => {
     if (!mongoose_1.Types.ObjectId.isValid(id)) {
         throw new http_errors_1.default.BadRequest('Invalid user id');

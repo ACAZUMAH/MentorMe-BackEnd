@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMyMentorMentee = exports.deleteUser = exports.updateProfile = void 0;
+exports.getMyMentorMentee = exports.getAllMentorsOrMentees = exports.deleteUser = exports.updateProfile = void 0;
 const services = __importStar(require("../services/users-services/index"));
 /**
  * update a user's profile data by id
@@ -67,6 +67,24 @@ const deleteUser = async (req, res) => {
     return res.status(400).json({ success: false, message: 'Unable to delete user' });
 };
 exports.deleteUser = deleteUser;
+/**
+ * controller for getting a list of mentors or mentees
+ * @param req Request object
+ * @param res Response object
+ * @returns found list of mentors or mentees
+ */
+const getAllMentorsOrMentees = async (req, res) => {
+    const data = await services.findAllMentorsOrMentees({ ...req.query });
+    if (data) {
+        return res.status(200).json({
+            success: true,
+            data: data.length > 0 ? data : { message: `No ${req.query.role}s found` }
+        });
+    }
+    ;
+    return res.status(400).json({ success: false, message: `Could not get ${req.query.role}s` });
+};
+exports.getAllMentorsOrMentees = getAllMentorsOrMentees;
 const getMyMentorMentee = async (req, res) => {
     const user = req.user;
     const data = await services.getMyMentorMentee(user.id);
