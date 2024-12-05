@@ -33,6 +33,26 @@ export const deleteUser = async (req: Request, res: Response) => {
     return res.status(400).json({ success: false, message: 'Unable to delete user' });
 };
 
+/**
+ * controller for getting a list of mentors or mentees
+ * @param req Request object
+ * @param res Response object
+ * @returns found list of mentors or mentees
+ */
+export const getAllMentorsOrMentees = async (req: Request, res: Response) => {
+    const data = await services.findAllMentorsOrMentees({ ...req.query as any });
+    
+    if(data) {
+        return res.status(200).json(
+            { 
+                success: true, 
+                data: data.length > 0 ? data : { message: `No ${req.query.role}s found` } 
+            }
+        );
+    };
+    return res.status(400).json({success: false, message: `Could not get ${req.query.role}s`}); 
+};
+
 export const getMyMentorMentee = async(req: Request, res: Response) => {
     const user: any = req.user;
     const data = await services.getMyMentorMentee(user.id);

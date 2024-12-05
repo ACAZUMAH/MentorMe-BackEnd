@@ -7,6 +7,8 @@ import { userType } from "../types";
 import { validateAuthData, validateProfileData } from "./validateUserData";
 import { createAuth } from "../auth-services";
 import { hashPassword} from "../../helpers";
+import filterQuery from "../filters/filter";
+import { queryType } from "../types";
 
 /**
  * create a new user in the database with phone and 
@@ -147,8 +149,30 @@ export const findUserByIdAndDelete = async (id: string | Types.ObjectId) => {
     return user;
 };
 
-export const getMyMentorMentee = async (id: string | Types.ObjectId) => {
+/**
+ * find a user from the databaase by role and filter
+ *  by fullName, programmeOfStudy, level and sort them
+ * @param query query object
+ * @returns result of the query
+ */
+export const findAllMentorsOrMentees = async (query: queryType) => {
+    const { page, limit } = query;
+    const queryObject = await filterQuery(query);
+    let result = User.find(queryObject);
+    if(query.sort){
+        const sortArray = query.sort.split(',').join(' ');
+        result = result.sort(sortArray);
+    }else{
+        result = result.sort('fullName');
+    }
+    const pages = Number(page) || 1;
+    const limits = Number(limit) || 10;
+    const skip = (pages - 1) * limits;
+    result = result.skip(skip).limit(limits);
+    return await result;
+};
 
+export const getMyMentorMentee = async (id: string | Types.ObjectId) => {
     if (!Types.ObjectId.isValid(id)) {
         throw new createHttpError.BadRequest('Invalid user id');
     }
@@ -162,4 +186,4 @@ export const getMyMentorMentee = async (id: string | Types.ObjectId) => {
         list = await Mentee.findOne({menteeID: id});
     }
     return list;
-}
+};

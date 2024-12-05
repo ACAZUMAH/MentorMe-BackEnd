@@ -19,7 +19,7 @@ export const generateOtpAndSendSms = async (id: string | Types.ObjectId, phone: 
     const ExpiresIn = new Date(Date.now() + 1 * 60 * 1000);
     await findAuthAndUpdate(id, { code: otp, expiresIn: ExpiresIn });
     const sms = `Your verification code is: ${otp}`;
-    await sendSms(phone, sms);
+    //await sendSms(phone, sms);
     return true;
 };
 

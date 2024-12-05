@@ -20,14 +20,18 @@ export interface authType {
 };
 
 export interface queryType {
-    role: string;
-    id?: string | Types.ObjectId;
+    role?: string;
     fullName?: string | object;
     programmeOfStudy?: string | object;
     level?: string;
     sort?: string;
     page?: number;
     limit?: number;
+};
+
+export interface idType {
+    menteeId: string | Types.ObjectId;
+    mentorId: string | Types.ObjectId;
 };
 
 export {

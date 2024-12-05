@@ -14,7 +14,7 @@ const sendSms = async (phone: string, message: string) => {
                 "key": apiKey,
                 "msisdn": `${phoneFormat}, 233xxxxxxxx`,
                 "message": message,
-                "sender_id": "findjobs",
+                "sender_id": "MentorMe",
             })
         }
     );
