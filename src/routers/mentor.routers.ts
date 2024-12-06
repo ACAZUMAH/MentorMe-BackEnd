@@ -9,6 +9,6 @@ router.post('/accept/:id', mentorme.acceptRequest);
 
 router.post('/reject/:id', mentorme.rejectRequest);
 
-router.get('/mentees', mentorme.rejectRequest);
+// router.get('/mentees', mentorme.getMentees);
 
 export default router;

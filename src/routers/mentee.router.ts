@@ -7,6 +7,6 @@ router.post('/request/:id', mentee.menteeRequestMentorship);
 
 router.get('/requests', mentee.getMenteeRequests);
 
-router.get('/mentors', mentee.getMentors);
+// router.get('/mentors', mentee.getMentors);
 
 export default router;

@@ -1,5 +1,6 @@
 import User from "../../models/schemas/usersSchema";
 import mentor from "../../models/schemas/mentors";
+import * as UserServices from "../users-services"
 import filterResult from "../filters/filter";
 import createHttpError from "http-errors";
 import { Types } from "mongoose";
@@ -47,17 +48,6 @@ export const addMentee = async (ids: idType) => {
 };
 
 export const getMentees = async (id: string | Types.ObjectId) => {
-    if (!Types.ObjectId.isValid(id)) {
-        throw new createHttpError.BadRequest('Invalid user id');
-    }
-    const user = await User.findById(id);
-    const role = user?.role;
-    if (role != 'mentor') {
-        return new createHttpError.BadRequest("You are not a mentor");
-    }
-    const data = await mentor.findOne({ mentorID: id });
-    const list = data?.mentees;
-    const result = await User.find({ _id: { $in: list } });
-    // console.log("result ",result);
-    return result;
+    const data = await mentor.findOne({ mentorId: id });
+    return data;
 };

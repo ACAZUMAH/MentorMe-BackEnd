@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import createHttpError from "http-errors"; 
-import { addMentor } from "../services/mentees-services/mentees";
+import createHttpError from "http-errors";
+import { addMentor } from "../services/mentees-services";
 import * as mentor from "../services/mentors-services";
 import * as services from "../services/mentoship-services/mentorship";
 
@@ -13,7 +13,7 @@ import * as services from "../services/mentoship-services/mentorship";
 export const getMentorshipRequests = async (req: Request, res: Response) => {
     const user: any = req.user;
     const data = await services.findRequests(user.id, req.query.page as string);
-    if(!data) {
+    if (!data) {
         return new createHttpError.BadRequest('No mentorship requests found');
     }
     return res.status(200).json({ success: true, data: data });
@@ -30,7 +30,7 @@ export const acceptRequest = async (req: Request, res: Response) => {
     const data = await services.acceptRequest(
         { mentorId: user.id, menteeId: req.params.id }
     );
-    if(!data) {
+    if (!data) {
         return new createHttpError.BadRequest('Unable to accept request');
     }
     mentor.addMentee({ mentorId: user.id, menteeId: req.params.id });
@@ -49,19 +49,9 @@ export const rejectRequest = async (req: Request, res: Response) => {
     const data = await services.rejectRequest(
         { mentorId: user.id, menteeId: req.params.id }
     );
-    if(!data) {
+    if (!data) {
         return new createHttpError.BadRequest('Unable to reject request');
     }
     return res.status(200).json({ success: true, data: data });
 };
 
-export const getMentees = async (req: Request, res: Response) => {
-    const user: any = req.user;
-    // console.log("user info ",user)
-    const data = await mentor.getMentees(user.id);
-    // console.log(data);
-    if (data) {
-        return res.status(200).json({ success: true, data: data });
-    }
-    return res.status(400).json({ success: false, message: `Could not get data` });
-}

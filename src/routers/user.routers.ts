@@ -99,7 +99,7 @@ router.post('/profile', user.updateProfile);
 
 router.delete('/delete', user.deleteUser);
 
-router.get("/my-mentor-mentee", user.getMyMentorMentee)
+router.get("/my-mentor-mentee", user.getMyMentorsOrMentees);
 
 router.get('/mentors-mentees', user.getAllMentorsOrMentees);
 

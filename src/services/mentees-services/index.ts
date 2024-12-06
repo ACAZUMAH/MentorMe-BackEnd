@@ -49,17 +49,7 @@ export const addMentor = async (ids: idType) => {
 };
 
 export const getMentors = async (id: string | Types.ObjectId) => {
-    if (!Types.ObjectId.isValid(id)) {
-        throw new createHttpError.BadRequest('Invalid user id');
-    }
-    const user = await User.findById(id);
-    const role = user?.role;
-    
-    if (role != 'mentee') {
-        return new createHttpError.BadRequest("You are not a mentee");
-    }
-    let data = await mentee.findOne({ menteeID: id });
-    const list = data?.mentors;
-    const result = await User.find({ _id: { $in: list } });
-    return result;
+    const data = await mentee.findOne({ menteeId: id });
+    console.log(data);
+    return data;
 };

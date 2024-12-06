@@ -1,12 +1,12 @@
 import User from "../../models/schemas/usersSchema";
-import Mentor from "../../models/schemas/mentors";
-import Mentee from "../../models/schemas/mentees";
+import * as Mentor from "../mentors-services";
+import * as Mentee from "../mentees-services";
 import createHttpError from "http-errors";
 import { Types } from "mongoose";
 import { userType } from "../types";
 import { validateAuthData, validateProfileData } from "./validateUserData";
 import { createAuth } from "../auth-services";
-import { hashPassword} from "../../helpers";
+import { hashPassword } from "../../helpers";
 import filterQuery from "../filters/filter";
 import { queryType } from "../types";
 
@@ -20,10 +20,10 @@ export const createUser = async (data: userType) => {
     await validateAuthData(data);
     const hashedPassword = await hashPassword(data.password as string);
     const user = await User.create({ ...data, password: hashedPassword });
-    if(!user){
+    if (!user) {
         throw new createHttpError.InternalServerError('Could not create user');
     }
-    await createAuth(user._id );
+    await createAuth(user._id);
     return user;
 };
 
@@ -35,7 +35,7 @@ export const createUser = async (data: userType) => {
  */
 export const createGoogleUser = async (data: userType) => {
     const user = await User.create({ ...data });
-    if(!user){
+    if (!user) {
         throw new createHttpError.InternalServerError('Could not create user');
     }
     return user;
@@ -47,7 +47,7 @@ export const createGoogleUser = async (data: userType) => {
  * @throws 409 if user already exists
  */
 export const checkUserExists = async (phone: string) => {
-    if(await User.exists({ phone })){
+    if (await User.exists({ phone })) {
         throw new createHttpError.Conflict('User already exists');
     };
 };
@@ -60,7 +60,7 @@ export const checkUserExists = async (phone: string) => {
  * @throws 400 if the id is invalid
  */
 export const findUserById = async (id: string | Types.ObjectId) => {
-    if(!Types.ObjectId.isValid(id)){
+    if (!Types.ObjectId.isValid(id)) {
         throw new createHttpError.BadRequest('Invalid user id');
     }
     const user = await User.findById({ _id: id }, { password: 0, __v: 0 });
@@ -86,7 +86,7 @@ export const findUserByEmail = async (email: string) => {
  * @returns user
  */
 export const getUserByPhone = async (phone: string) => {
-    if(!await User.exists({ phone })){
+    if (!await User.exists({ phone })) {
         throw new createHttpError.NotFound('No user found with this phone number');
     };
     return await User.findOne({ phone });
@@ -101,11 +101,11 @@ export const getUserByPhone = async (phone: string) => {
  * @throws 400 if the id is invalid
  */
 export const finduserByIdAndUpdateIsAuth = async (id: string | Types.ObjectId) => {
-    if(!Types.ObjectId.isValid(id)){
+    if (!Types.ObjectId.isValid(id)) {
         throw new createHttpError.BadRequest('Invalid user id');
     }
     const user = await User.findByIdAndUpdate({ _id: id }, { isAuthenticated: true }, { new: true });
-    if(!user){
+    if (!user) {
         throw new createHttpError.NotFound('No user found with this id');
     }
     return true;
@@ -120,12 +120,12 @@ export const finduserByIdAndUpdateIsAuth = async (id: string | Types.ObjectId) =
  * @throws 400 if the id is invalid
  */
 export const findUserByIdAndUpdate = async (id: string | Types.ObjectId, data: userType) => {
-    if(!Types.ObjectId.isValid(id)){
+    if (!Types.ObjectId.isValid(id)) {
         throw new createHttpError.BadRequest('Invalid user id');
     };
     await validateProfileData(data);
     const user = await User.findByIdAndUpdate({ _id: id }, { ...data }, { new: true });
-    if(!user){
+    if (!user) {
         throw new createHttpError.NotFound('No user found with this id');
     };
     return true;
@@ -139,11 +139,11 @@ export const findUserByIdAndUpdate = async (id: string | Types.ObjectId, data: u
  * @throws 400 if the id is invalid
  */
 export const findUserByIdAndDelete = async (id: string | Types.ObjectId) => {
-    if(!Types.ObjectId.isValid(id)){
+    if (!Types.ObjectId.isValid(id)) {
         throw new createHttpError.BadRequest('Invalid user id');
     };
     const user = await User.findByIdAndDelete({ _id: id });
-    if(!user){
+    if (!user) {
         throw new createHttpError.NotFound('No user found with this id');
     };
     return user;
@@ -159,10 +159,10 @@ export const findAllMentorsOrMentees = async (query: queryType) => {
     const { page, limit } = query;
     const queryObject = await filterQuery(query);
     let result = User.find(queryObject);
-    if(query.sort){
+    if (query.sort) {
         const sortArray = query.sort.split(',').join(' ');
         result = result.sort(sortArray);
-    }else{
+    } else {
         result = result.sort('fullName');
     }
     const pages = Number(page) || 1;
@@ -172,18 +172,35 @@ export const findAllMentorsOrMentees = async (query: queryType) => {
     return await result;
 };
 
-export const getMyMentorMentee = async (id: string | Types.ObjectId) => {
+
+export const getMyMentorsOrMentees = async (id: string | Types.ObjectId, query: queryType) => {
     if (!Types.ObjectId.isValid(id)) {
         throw new createHttpError.BadRequest('Invalid user id');
     }
-    const user = await User.findById(id);
+    const { page, limit } = query;
+    const queryObject = await filterQuery(query);
+
+    const user = await findUserById(id);
+
     const role = user?.role;
+    let data;
     let list;
-    if(role == 'mentor'){
-        list = await Mentor.findOne({ mentorID: id });
+    if (role == 'mentor') {
+        data = await Mentor.getMentees(id);
+        list = data?.mentees;
     }
-    if(role == 'mentee'){
-        list = await Mentee.findOne({menteeID: id});
+    if (role == 'mentee') {
+        data = await Mentee.getMentors(id);
+        list = data?.mentors;
     }
-    return list;
+
+    let result = User.find({ _id: { $in: list }, ...queryObject })
+
+    const pages = Number(page) || 1;
+    const limits = Number(limit) || 10;
+    const skip = (pages - 1) * limits;
+
+    result = result.skip(skip).limit(limits);
+
+    return await result;
 };
