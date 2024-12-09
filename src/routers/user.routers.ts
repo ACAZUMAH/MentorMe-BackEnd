@@ -8,10 +8,11 @@ import { Router } from "express";
 import * as user from "../controllers/user.controller";
 
 const router = Router();
+
 /**
  * @swagger
  * user/profile:
- *   post:
+ *   patch:
  *     summary: Update user's profile data.
  *     tags:
  *       - User
@@ -95,12 +96,12 @@ const router = Router();
  *                   type: string
  *                   example: "Internal server error."
  */
-router.post('/profile', user.updateProfile);
-
-router.delete('/delete', user.deleteUser);
+router.patch('/profile', user.updateProfile);
 
 router.get("/my-mentor-mentee", user.getMyMentorsOrMentees);
 
 router.get('/mentors-mentees', user.getAllMentorsOrMentees);
+
+router.delete('delete/', user.deleteUser);
 
 export default router;

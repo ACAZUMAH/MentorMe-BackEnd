@@ -1,10 +1,8 @@
 import User from "../../models/schemas/usersSchema";
 import mentor from "../../models/schemas/mentors";
-import * as UserServices from "../users-services"
-import filterResult from "../filters/filter";
 import createHttpError from "http-errors";
 import { Types } from "mongoose";
-import { queryType, idType } from "../types";
+import { idType } from "../types";
 
 /**
  * find mentor by id and return it's data with mentees
@@ -47,7 +45,15 @@ export const addMentee = async (ids: idType) => {
     return true;
 };
 
-export const getMentees = async (id: string | Types.ObjectId) => {
-    const data = await mentor.findOne({ mentorId: id });
-    return data;
+/**
+ * 
+ * @param id 
+ * @returns 
+ */
+export const deleteMentorData = async (id: string | Types.ObjectId) => {
+    if(!Types.ObjectId.isValid(id)){
+        return new createHttpError.BadRequest("Invalid user's id");
+    };
+    await mentor.findByIdAndDelete(id);
+    return true;
 };

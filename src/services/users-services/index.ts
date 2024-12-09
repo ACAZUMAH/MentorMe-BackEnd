@@ -1,6 +1,4 @@
 import User from "../../models/schemas/usersSchema";
-import * as Mentor from "../mentors-services";
-import * as Mentee from "../mentees-services";
 import createHttpError from "http-errors";
 import { Types } from "mongoose";
 import { userType } from "../types";
@@ -9,6 +7,9 @@ import { createAuth } from "../auth-services";
 import { hashPassword } from "../../helpers";
 import filterQuery from "../filters/filter";
 import { queryType } from "../types";
+import * as Mentor from '../mentors-services/index'
+import * as Mentee from '../mentees-services/index'
+
 
 /**
  * create a new user in the database with phone and 
@@ -146,6 +147,12 @@ export const findUserByIdAndDelete = async (id: string | Types.ObjectId) => {
     if (!user) {
         throw new createHttpError.NotFound('No user found with this id');
     };
+    if(user.role === 'Mentor'){
+        await Mentor.deleteMentorData(id);
+    };
+    if(user.role === 'Mentee'){
+        await Mentee.deleteMenteeData(id);
+    };
     return user;
 };
 
@@ -158,7 +165,7 @@ export const findUserByIdAndDelete = async (id: string | Types.ObjectId) => {
 export const findAllMentorsOrMentees = async (query: queryType) => {
     const { page, limit } = query;
     const queryObject = await filterQuery(query);
-    let result = User.find(queryObject);
+    let result = User.find(queryObject, { password: 0, __v: 0 });
     if (query.sort) {
         const sortArray = query.sort.split(',').join(' ');
         result = result.sort(sortArray);
@@ -172,35 +179,34 @@ export const findAllMentorsOrMentees = async (query: queryType) => {
     return await result;
 };
 
-
+/**
+ * 
+ * @param id 
+ * @param query 
+ * @returns 
+ */
 export const getMyMentorsOrMentees = async (id: string | Types.ObjectId, query: queryType) => {
     if (!Types.ObjectId.isValid(id)) {
         throw new createHttpError.BadRequest('Invalid user id');
     }
     const { page, limit } = query;
     const queryObject = await filterQuery(query);
-
     const user = await findUserById(id);
-
     const role = user?.role;
-    let data;
-    let list;
-    if (role == 'mentor') {
-        data = await Mentor.getMentees(id);
+    let data: any;
+    let list: any;
+    if (role === 'Mentor') {
+        data = await Mentor.getMentorData(id);
         list = data?.mentees;
     }
-    if (role == 'mentee') {
-        data = await Mentee.getMentors(id);
+    if (role === 'Mentee') {
+        data = await Mentee.getMenteeData(id);
         list = data?.mentors;
     }
-
-    let result = User.find({ _id: { $in: list }, ...queryObject })
-
+    let result = User.find({ _id: { $in: list }, ...queryObject }, { password: 0, __v: 0} )
     const pages = Number(page) || 1;
     const limits = Number(limit) || 10;
     const skip = (pages - 1) * limits;
-
     result = result.skip(skip).limit(limits);
-
     return await result;
 };

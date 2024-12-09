@@ -1,13 +1,15 @@
 import { Router } from "express";
-import * as mentorme from "../controllers/mentors.controller";
+import * as mentor from "../controllers/mentors.controller";
 
 const router = Router();
 
-router.get('/requests', mentorme.getMentorshipRequests);
+router.get('/requests', mentor.getMentorshipRequests);
 
-router.post('/accept/:id', mentorme.acceptRequest);
+router.post('/accept/:id', mentor.acceptRequest);
 
-router.post('/reject/:id', mentorme.rejectRequest);
+router.post('/reject/:id', mentor.rejectRequest);
+
+// router.get('/mentees', mentorme.getMentees);
 
 // router.get('/mentees', mentorme.getMentees);
 

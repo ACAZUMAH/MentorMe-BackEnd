@@ -17,7 +17,7 @@ export const requestMentorship = async (ids: idType) => {
         });
         return request;
     };
-    return new createHttpError.BadRequest('Invalid mentor or mentee id');
+    throw new createHttpError.BadRequest('Invalid mentor or mentee id');
 };
 
 /**
@@ -46,7 +46,7 @@ export const findRequests = async (id: string | Types.ObjectId, page: string) =>
 export const acceptRequest = async (ids: idType) => {
     if(!Types.ObjectId.isValid(ids.mentorId) || 
        !Types.ObjectId.isValid(ids.menteeId)){
-        return new createHttpError.BadRequest('Invalid mentor or mentee id');
+        throw new createHttpError.BadRequest('Invalid mentor or mentee id');
     };
     const request = await mentorship.findOneAndUpdate(
         { mentorId: ids.mentorId, menteeId: ids.menteeId }, 
@@ -54,7 +54,7 @@ export const acceptRequest = async (ids: idType) => {
         { new: true }
     );
     if(!request){
-        return new createHttpError.NotFound('No request found');
+        throw new createHttpError.NotFound('No request found');
     };
     return request;
 };
@@ -67,7 +67,7 @@ export const acceptRequest = async (ids: idType) => {
 export const rejectRequest = async (ids: idType) => {
     if(!Types.ObjectId.isValid(ids.mentorId) || 
        !Types.ObjectId.isValid(ids.menteeId)){
-        return new createHttpError.BadRequest('Invalid mentor or mentee id');
+        throw new createHttpError.BadRequest('Invalid mentor or mentee id');
     };
     const request = await mentorship.findOneAndUpdate(
         { mentorId: ids.mentorId, menteeId: ids.menteeId }, 
@@ -75,7 +75,25 @@ export const rejectRequest = async (ids: idType) => {
         { new: true }
     );
     if(!request){
-        return new createHttpError.NotFound('No request found');
+        throw new createHttpError.NotFound('No request found');
     };
     return request;
+};
+
+/**
+ * 
+ * @param id 
+ */
+export const CancelRequest = async (menteeId: string, requestId: string ) => {
+  if (!Types.ObjectId.isValid(menteeId) || !Types.ObjectId.isValid(requestId)) {
+    throw new createHttpError.BadRequest("Invalid user or request id");
+  }
+  const cancel = await mentorship.findByIdAndDelete({
+    _id: requestId,
+    menteeId,
+  });
+  if (!cancel) {
+    throw new createHttpError.BadRequest("No request found");
+  }
+  return cancel;
 };
