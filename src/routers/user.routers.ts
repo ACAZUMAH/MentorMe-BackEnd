@@ -102,6 +102,6 @@ router.get("/my-mentor-mentee", user.getMyMentorsOrMentees);
 
 router.get('/mentors-mentees', user.getAllMentorsOrMentees);
 
-router.delete('delete/', user.deleteUser);
+router.delete('/delete', user.deleteUser);
 
 export default router;

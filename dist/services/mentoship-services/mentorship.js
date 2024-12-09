@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.rejectRequest = exports.acceptRequest = exports.findRequests = exports.requestMentorship = void 0;
+exports.CancelRequest = exports.rejectRequest = exports.acceptRequest = exports.findRequests = exports.requestMentorship = void 0;
 const mentorshipRequest_1 = __importDefault(require("../../models/schemas/mentorshipRequest"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const mongoose_1 = require("mongoose");
@@ -22,7 +22,7 @@ const requestMentorship = async (ids) => {
         return request;
     }
     ;
-    return new http_errors_1.default.BadRequest('Invalid mentor or mentee id');
+    throw new http_errors_1.default.BadRequest('Invalid mentor or mentee id');
 };
 exports.requestMentorship = requestMentorship;
 /**
@@ -52,12 +52,12 @@ exports.findRequests = findRequests;
 const acceptRequest = async (ids) => {
     if (!mongoose_1.Types.ObjectId.isValid(ids.mentorId) ||
         !mongoose_1.Types.ObjectId.isValid(ids.menteeId)) {
-        return new http_errors_1.default.BadRequest('Invalid mentor or mentee id');
+        throw new http_errors_1.default.BadRequest('Invalid mentor or mentee id');
     }
     ;
     const request = await mentorshipRequest_1.default.findOneAndUpdate({ mentorId: ids.mentorId, menteeId: ids.menteeId }, { status: 'accepted' }, { new: true });
     if (!request) {
-        return new http_errors_1.default.NotFound('No request found');
+        throw new http_errors_1.default.NotFound('No request found');
     }
     ;
     return request;
@@ -71,14 +71,32 @@ exports.acceptRequest = acceptRequest;
 const rejectRequest = async (ids) => {
     if (!mongoose_1.Types.ObjectId.isValid(ids.mentorId) ||
         !mongoose_1.Types.ObjectId.isValid(ids.menteeId)) {
-        return new http_errors_1.default.BadRequest('Invalid mentor or mentee id');
+        throw new http_errors_1.default.BadRequest('Invalid mentor or mentee id');
     }
     ;
     const request = await mentorshipRequest_1.default.findOneAndUpdate({ mentorId: ids.mentorId, menteeId: ids.menteeId }, { status: 'rejected' }, { new: true });
     if (!request) {
-        return new http_errors_1.default.NotFound('No request found');
+        throw new http_errors_1.default.NotFound('No request found');
     }
     ;
     return request;
 };
 exports.rejectRequest = rejectRequest;
+/**
+ *
+ * @param id
+ */
+const CancelRequest = async (menteeId, requestId) => {
+    if (!mongoose_1.Types.ObjectId.isValid(menteeId) || !mongoose_1.Types.ObjectId.isValid(requestId)) {
+        throw new http_errors_1.default.BadRequest("Invalid user or request id");
+    }
+    const cancel = await mentorshipRequest_1.default.findByIdAndDelete({
+        _id: requestId,
+        menteeId,
+    });
+    if (!cancel) {
+        throw new http_errors_1.default.BadRequest("No request found");
+    }
+    return cancel;
+};
+exports.CancelRequest = CancelRequest;

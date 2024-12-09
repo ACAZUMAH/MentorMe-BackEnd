@@ -38,7 +38,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.rejectRequest = exports.acceptRequest = exports.getMentorshipRequests = void 0;
 const http_errors_1 = __importDefault(require("http-errors"));
-const mentees_1 = require("../services/mentees-services/mentees");
+const mentees_services_1 = require("../services/mentees-services");
 const mentor = __importStar(require("../services/mentors-services"));
 const services = __importStar(require("../services/mentoship-services/mentorship"));
 /**
@@ -69,7 +69,7 @@ const acceptRequest = async (req, res) => {
         return new http_errors_1.default.BadRequest('Unable to accept request');
     }
     mentor.addMentee({ mentorId: user.id, menteeId: req.params.id });
-    (0, mentees_1.addMentor)({ mentorId: user.id, menteeId: req.params.id });
+    (0, mentees_services_1.addMentor)({ mentorId: user.id, menteeId: req.params.id });
     return res.status(200).json({ success: true, data: data });
 };
 exports.acceptRequest = acceptRequest;

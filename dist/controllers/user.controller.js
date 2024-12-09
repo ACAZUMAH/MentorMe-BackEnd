@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMyMentorMentee = exports.getAllMentorsOrMentees = exports.deleteUser = exports.updateProfile = void 0;
+exports.getMyMentorsOrMentees = exports.getAllMentorsOrMentees = exports.deleteUser = exports.updateProfile = void 0;
 const services = __importStar(require("../services/users-services/index"));
 /**
  * update a user's profile data by id
@@ -85,12 +85,22 @@ const getAllMentorsOrMentees = async (req, res) => {
     return res.status(400).json({ success: false, message: `Could not get ${req.query.role}s` });
 };
 exports.getAllMentorsOrMentees = getAllMentorsOrMentees;
-const getMyMentorMentee = async (req, res) => {
+/**
+ *
+ * @param req
+ * @param res
+ * @returns
+ */
+const getMyMentorsOrMentees = async (req, res) => {
     const user = req.user;
-    const data = await services.getMyMentorMentee(user.id);
+    const data = await services.getMyMentorsOrMentees(user.id, { ...req.query });
     if (data) {
-        return res.status(200).json({ success: true, data: data });
+        return res.status(200).json({
+            success: true,
+            data: data.length > 0 ? data : { message: `No mentees found` }
+        });
     }
+    ;
     return res.status(400).json({ success: false, message: `Could not get data` });
 };
-exports.getMyMentorMentee = getMyMentorMentee;
+exports.getMyMentorsOrMentees = getMyMentorsOrMentees;
