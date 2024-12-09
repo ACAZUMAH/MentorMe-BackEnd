@@ -7,6 +7,8 @@ router.post('/request/:id', mentee.menteeRequestMentorship);
 
 router.get('/requests', mentee.getMenteeRequests);
 
+router.delete('/request/:id', mentee.cancelMentorshipRequest)
+
 // router.get('/mentors', mentee.getMentors);
 
 export default router;

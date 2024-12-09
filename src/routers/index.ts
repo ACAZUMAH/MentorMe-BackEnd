@@ -3,6 +3,7 @@ import authRoutes from "./auth.routers";
 import userRoutes from "./user.routers";
 import menteeroutes from "./mentee.router";
 import mentorRoutes from "./mentor.routers"
+import { deleteUser } from "../controllers/user.controller";
 import { verifyAccessToken } from "../helpers";
 
 const router = Router();

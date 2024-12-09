@@ -1,9 +1,8 @@
 import mentee from "../../models/schemas/mentees";
 import User from "../../models/schemas/usersSchema";
 import createHttpError from "http-errors";
-import { idType, queryType } from "../types";
+import { idType } from "../types";
 import { Types } from "mongoose";
-import filterQuery from "../filters/filter";
 
 /**
  * find mentee by id and return it's data with mentors
@@ -13,7 +12,7 @@ import filterQuery from "../filters/filter";
  */
 export const getMenteeData = async (id: string | Types.ObjectId) => {
     if(!Types.ObjectId.isValid(id)){
-        return  new createHttpError.BadRequest('Invalid mentee id');
+        throw new createHttpError.BadRequest('Invalid mentee id');
     };
     const menteeData: any = await mentee.findOne({ menteeId: id });
     if(!menteeData){
@@ -33,7 +32,7 @@ export const getMenteeData = async (id: string | Types.ObjectId) => {
 export const addMentor = async (ids: idType) => {
     if(!Types.ObjectId.isValid(ids.mentorId) || 
        !Types.ObjectId.isValid(ids.menteeId)){
-        return new createHttpError.BadRequest('Invalid mentor or mentee id');
+        throw new createHttpError.BadRequest('Invalid mentor or mentee id');
     };
     const menteeData = await mentee.findOneAndUpdate(
         { menteeId: ids.menteeId },
@@ -48,8 +47,16 @@ export const addMentor = async (ids: idType) => {
     return true;
 };
 
-export const getMentors = async (id: string | Types.ObjectId) => {
-    const data = await mentee.findOne({ menteeId: id });
-    console.log(data);
-    return data;
+/**
+ * 
+ * @param id 
+ * @returns boolean true
+ * @throws 400 if id is invalid
+ */
+export const deleteMenteeData = async (id: string | Types.ObjectId) => {
+    if(!Types.ObjectId.isValid(id)){
+        throw new createHttpError.BadRequest("Invalid user's id");
+    };
+    await mentee.findByIdAndDelete(id);
+    return true;
 };
