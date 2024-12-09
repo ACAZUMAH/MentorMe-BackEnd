@@ -14,7 +14,7 @@ const http_errors_1 = __importDefault(require("http-errors"));
 const errorHandler = (err, req, res, next) => {
     console.log(err);
     if (err instanceof http_errors_1.default.HttpError) {
-        res.status(err.statusCode).json({ errors: [{ message: err.message }] });
+        return res.status(err.statusCode).json({ errors: [{ message: err.message }] });
     }
     return res.status(500).json({ errors: [{ message: 'Internal Server Error' }] });
 };

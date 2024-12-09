@@ -1,18 +1,51 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMyMentorMentee = exports.findAllMentorsOrMentees = exports.findUserByIdAndDelete = exports.findUserByIdAndUpdate = exports.finduserByIdAndUpdateIsAuth = exports.getUserByPhone = exports.findUserByEmail = exports.findUserById = exports.checkUserExists = exports.createGoogleUser = exports.createUser = void 0;
+exports.getMyMentorsOrMentees = exports.findAllMentorsOrMentees = exports.findUserByIdAndDelete = exports.findUserByIdAndUpdate = exports.finduserByIdAndUpdateIsAuth = exports.getUserByPhone = exports.findUserByEmail = exports.findUserById = exports.checkUserExists = exports.createGoogleUser = exports.createUser = void 0;
 const usersSchema_1 = __importDefault(require("../../models/schemas/usersSchema"));
-const mentors_1 = __importDefault(require("../../models/schemas/mentors"));
-const mentees_1 = __importDefault(require("../../models/schemas/mentees"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const mongoose_1 = require("mongoose");
 const validateUserData_1 = require("./validateUserData");
 const auth_services_1 = require("../auth-services");
 const helpers_1 = require("../../helpers");
 const filter_1 = __importDefault(require("../filters/filter"));
+const Mentor = __importStar(require("../mentors-services/index"));
+const Mentee = __importStar(require("../mentees-services/index"));
 /**
  * create a new user in the database with phone and
  * password, then create an auth record
@@ -155,6 +188,14 @@ const findUserByIdAndDelete = async (id) => {
         throw new http_errors_1.default.NotFound('No user found with this id');
     }
     ;
+    if (user.role === 'Mentor') {
+        await Mentor.deleteMentorData(id);
+    }
+    ;
+    if (user.role === 'Mentee') {
+        await Mentee.deleteMenteeData(id);
+    }
+    ;
     return user;
 };
 exports.findUserByIdAndDelete = findUserByIdAndDelete;
@@ -167,7 +208,7 @@ exports.findUserByIdAndDelete = findUserByIdAndDelete;
 const findAllMentorsOrMentees = async (query) => {
     const { page, limit } = query;
     const queryObject = await (0, filter_1.default)(query);
-    let result = usersSchema_1.default.find(queryObject);
+    let result = usersSchema_1.default.find(queryObject, { password: 0, __v: 0 });
     if (query.sort) {
         const sortArray = query.sort.split(',').join(' ');
         result = result.sort(sortArray);
@@ -182,19 +223,35 @@ const findAllMentorsOrMentees = async (query) => {
     return await result;
 };
 exports.findAllMentorsOrMentees = findAllMentorsOrMentees;
-const getMyMentorMentee = async (id) => {
+/**
+ *
+ * @param id
+ * @param query
+ * @returns
+ */
+const getMyMentorsOrMentees = async (id, query) => {
     if (!mongoose_1.Types.ObjectId.isValid(id)) {
         throw new http_errors_1.default.BadRequest('Invalid user id');
     }
-    const user = await usersSchema_1.default.findById(id);
+    const { page, limit } = query;
+    const queryObject = await (0, filter_1.default)(query);
+    const user = await (0, exports.findUserById)(id);
     const role = user?.role;
+    let data;
     let list;
-    if (role == 'mentor') {
-        list = await mentors_1.default.findOne({ mentorID: id });
+    if (role === 'Mentor') {
+        data = await Mentor.getMentorData(id);
+        list = data?.mentees;
     }
-    if (role == 'mentee') {
-        list = await mentees_1.default.findOne({ menteeID: id });
+    if (role === 'Mentee') {
+        data = await Mentee.getMenteeData(id);
+        list = data?.mentors;
     }
-    return list;
+    let result = usersSchema_1.default.find({ _id: { $in: list }, ...queryObject }, { password: 0, __v: 0 });
+    const pages = Number(page) || 1;
+    const limits = Number(limit) || 10;
+    const skip = (pages - 1) * limits;
+    result = result.skip(skip).limit(limits);
+    return await result;
 };
-exports.getMyMentorMentee = getMyMentorMentee;
+exports.getMyMentorsOrMentees = getMyMentorsOrMentees;

@@ -45,7 +45,7 @@ const router = (0, express_1.Router)();
 /**
  * @swagger
  * user/profile:
- *   post:
+ *   patch:
  *     summary: Update user's profile data.
  *     tags:
  *       - User
@@ -129,8 +129,8 @@ const router = (0, express_1.Router)();
  *                   type: string
  *                   example: "Internal server error."
  */
-router.post('/profile', user.updateProfile);
-router.delete('/delete', user.deleteUser);
-router.get("/my-mentor-mentee", user.getMyMentorMentee);
+router.patch('/profile', user.updateProfile);
+router.get("/my-mentor-mentee", user.getMyMentorsOrMentees);
 router.get('/mentors-mentees', user.getAllMentorsOrMentees);
+router.delete('delete/', user.deleteUser);
 exports.default = router;

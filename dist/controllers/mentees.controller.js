@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMenteeRequests = exports.menteeRequestMentorship = void 0;
+exports.cancelMentorshipRequest = exports.getMenteeRequests = exports.menteeRequestMentorship = void 0;
 const services = __importStar(require("../services/mentoship-services/mentorship"));
 const http_errors_1 = __importDefault(require("http-errors"));
 /**
@@ -50,7 +50,7 @@ const menteeRequestMentorship = async (req, res) => {
     const user = req.user;
     const data = await services.requestMentorship({ menteeId: user.id, mentorId: req.params.id });
     if (!data) {
-        return new http_errors_1.default.BadRequest('Unable to request mentorship');
+        throw new http_errors_1.default.BadRequest('Unable to request mentorship');
     }
     ;
     return res.status(200).json({ success: true, data: data });
@@ -66,9 +66,25 @@ const getMenteeRequests = async (req, res) => {
     const user = req.user;
     const data = await services.findRequests(user.id, req.query.page);
     if (!data) {
-        return new http_errors_1.default.BadRequest('No mentorship requests found');
+        throw new http_errors_1.default.BadRequest('No mentorship requests found');
     }
     ;
     return res.status(200).json({ success: true, data: data });
 };
 exports.getMenteeRequests = getMenteeRequests;
+/**
+ *
+ * @param req Request object
+ * @param res Response object
+ * @throws 400 if no request is found
+ * @return canceled request
+ */
+const cancelMentorshipRequest = async (req, res) => {
+    const user = req.user;
+    const cancel = await services.CancelRequest(user.id, req.params.id);
+    if (cancel) {
+        cancel.status = 'canceled';
+    }
+    return res.status(200).json({ success: true, data: cancel });
+};
+exports.cancelMentorshipRequest = cancelMentorshipRequest;

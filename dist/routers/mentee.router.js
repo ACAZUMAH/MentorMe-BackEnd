@@ -38,5 +38,6 @@ const mentee = __importStar(require("../controllers/mentees.controller"));
 const router = (0, express_1.Router)();
 router.post('/request/:id', mentee.menteeRequestMentorship);
 router.get('/requests', mentee.getMenteeRequests);
-//router.get('/mentors', mentee.getMenteeMentors);
+router.delete('/request/:id', mentee.cancelMentorshipRequest);
+// router.get('/mentors', mentee.getMentors);
 exports.default = router;

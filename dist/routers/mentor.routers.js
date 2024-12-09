@@ -34,9 +34,11 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const mentorme = __importStar(require("../controllers/mentors.controller"));
+const mentor = __importStar(require("../controllers/mentors.controller"));
 const router = (0, express_1.Router)();
-router.get('/requests', mentorme.getMentorshipRequests);
-router.post('/accept/:id', mentorme.acceptRequest);
-router.post('/reject/:id', mentorme.rejectRequest);
+router.get('/requests', mentor.getMentorshipRequests);
+router.post('/accept/:id', mentor.acceptRequest);
+router.post('/reject/:id', mentor.rejectRequest);
+// router.get('/mentees', mentorme.getMentees);
+// router.get('/mentees', mentorme.getMentees);
 exports.default = router;
