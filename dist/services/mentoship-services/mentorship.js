@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CancelRequest = exports.rejectRequest = exports.acceptRequest = exports.findRequests = exports.requestMentorship = void 0;
+exports.deleteAllRequest = exports.CancelRequest = exports.rejectRequest = exports.acceptRequest = exports.findRequests = exports.requestMentorship = void 0;
 const mentorshipRequest_1 = __importDefault(require("../../models/schemas/mentorshipRequest"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const mongoose_1 = require("mongoose");
@@ -14,15 +14,14 @@ const mongoose_1 = require("mongoose");
  * @throws 400 if id is invalid
  */
 const requestMentorship = async (ids) => {
-    if (mongoose_1.Types.ObjectId.isValid(ids.mentorId)
-        && mongoose_1.Types.ObjectId.isValid(ids.menteeId)) {
+    if (mongoose_1.Types.ObjectId.isValid(ids.mentorId) &&
+        mongoose_1.Types.ObjectId.isValid(ids.menteeId)) {
         const request = mentorshipRequest_1.default.create({
-            ...ids
+            ...ids,
         });
         return request;
     }
-    ;
-    throw new http_errors_1.default.BadRequest('Invalid mentor or mentee id');
+    throw new http_errors_1.default.BadRequest("Invalid mentor or mentee id");
 };
 exports.requestMentorship = requestMentorship;
 /**
@@ -32,11 +31,10 @@ exports.requestMentorship = requestMentorship;
  */
 const findRequests = async (id, page) => {
     if (!mongoose_1.Types.ObjectId.isValid(id)) {
-        throw new http_errors_1.default.BadRequest('Invalid mentee id');
+        throw new http_errors_1.default.BadRequest("Invalid mentee id");
     }
-    ;
     let result = mentorshipRequest_1.default.find({ $or: [{ menteeId: id }, { mentorId: id }] });
-    result = result.sort('createdAt');
+    result = result.sort("createdAt");
     const pages = Number(page) || 1;
     const limit = 10;
     const skip = (pages - 1) * limit;
@@ -52,14 +50,12 @@ exports.findRequests = findRequests;
 const acceptRequest = async (ids) => {
     if (!mongoose_1.Types.ObjectId.isValid(ids.mentorId) ||
         !mongoose_1.Types.ObjectId.isValid(ids.menteeId)) {
-        throw new http_errors_1.default.BadRequest('Invalid mentor or mentee id');
+        throw new http_errors_1.default.BadRequest("Invalid mentor or mentee id");
     }
-    ;
-    const request = await mentorshipRequest_1.default.findOneAndUpdate({ mentorId: ids.mentorId, menteeId: ids.menteeId }, { status: 'accepted' }, { new: true });
+    const request = await mentorshipRequest_1.default.findOneAndUpdate({ mentorId: ids.mentorId, menteeId: ids.menteeId }, { status: "accepted" }, { new: true });
     if (!request) {
-        throw new http_errors_1.default.NotFound('No request found');
+        throw new http_errors_1.default.NotFound("No request found");
     }
-    ;
     return request;
 };
 exports.acceptRequest = acceptRequest;
@@ -71,20 +67,20 @@ exports.acceptRequest = acceptRequest;
 const rejectRequest = async (ids) => {
     if (!mongoose_1.Types.ObjectId.isValid(ids.mentorId) ||
         !mongoose_1.Types.ObjectId.isValid(ids.menteeId)) {
-        throw new http_errors_1.default.BadRequest('Invalid mentor or mentee id');
+        throw new http_errors_1.default.BadRequest("Invalid mentor or mentee id");
     }
-    ;
-    const request = await mentorshipRequest_1.default.findOneAndUpdate({ mentorId: ids.mentorId, menteeId: ids.menteeId }, { status: 'rejected' }, { new: true });
+    const request = await mentorshipRequest_1.default.findOneAndUpdate({ mentorId: ids.mentorId, menteeId: ids.menteeId }, { status: "rejected" }, { new: true });
     if (!request) {
-        throw new http_errors_1.default.NotFound('No request found');
+        throw new http_errors_1.default.NotFound("No request found");
     }
-    ;
     return request;
 };
 exports.rejectRequest = rejectRequest;
 /**
- *
- * @param id
+ * delete mentorship request from the database when a request is canceled
+ * @param menteeId mentee's id
+ * @param requestId id of the request to be canceled
+ * @returns canceled request
  */
 const CancelRequest = async (menteeId, requestId) => {
     if (!mongoose_1.Types.ObjectId.isValid(menteeId) || !mongoose_1.Types.ObjectId.isValid(requestId)) {
@@ -100,3 +96,23 @@ const CancelRequest = async (menteeId, requestId) => {
     return cancel;
 };
 exports.CancelRequest = CancelRequest;
+/**
+ * delete all requests by provided mentor or mentee id
+ * @param ids mentor or mentee id
+ * @returns boolean true
+ */
+const deleteAllRequest = async (menteeId, mentorId) => {
+    if (menteeId && !mongoose_1.Types.ObjectId.isValid(menteeId)) {
+        throw new http_errors_1.default.BadRequest('Invalid mentee id');
+    }
+    ;
+    if (mentorId && !mongoose_1.Types.ObjectId.isValid(mentorId)) {
+        throw new http_errors_1.default.BadRequest('Invalid mentor id');
+    }
+    ;
+    await mentorshipRequest_1.default.findByIdAndDelete({
+        $or: [{ menteeId: menteeId, mentorId: mentorId }]
+    });
+    return true;
+};
+exports.deleteAllRequest = deleteAllRequest;

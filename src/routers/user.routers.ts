@@ -11,11 +11,10 @@ const router = Router();
 
 /**
  * @swagger
- * user/profile:
+ * /user/profile:
  *   patch:
  *     summary: Update user's profile data.
- *     tags:
- *       - User
+ *     tags: [User Management]
  *     description: Updates a user's profile data using their ID. Returns the updated profile data if successful or an error message if the update fails.
  *     security:
  *       - bearerAuth: []
@@ -98,10 +97,295 @@ const router = Router();
  */
 router.patch('/profile', user.updateProfile);
 
-router.get("/my-mentor-mentee", user.getMyMentorsOrMentees);
+/**
+ * @swagger
+ * /user/mentor-mentee:
+ *   get:
+ *     summary: Retrieve mentee Mentors or mentor Mentees
+ *     tags: [User Management]
+ *     description: Returns a list of mentees for a mentor or mentors for a mentee based on the logged-in user's role.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: fullName
+ *         in: query
+ *         required: false
+ *         description: Filter mentors or mentees based on a specific user name.
+ *         schema:
+ *           type: string
+ *       - name: programOfStudy
+ *         in: query
+ *         required: false
+ *         description: Filter mentors or mentees based on a specific program of study.
+ *         schema:
+ *           type: string
+ *       - name: level
+ *         in: query
+ *         required: false
+ *         description: Filter mentors or mentees based on their level of study.
+ *         schema:
+ *           type: string
+ *       - name: sort
+ *         in: query
+ *         required: false
+ *         description: sort mentors or mentees base on name, program of study, level, created or updated at.
+ *         schema:
+ *           type: string
+ *       - name: limit
+ *         in: query
+ *         required: false
+ *         description: Limit the number of results returned.
+ *         schema:
+ *           type: integer
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: Specify the page number for paginated results.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved mentors or mentees.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   oneOf:
+ *                     - type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             example: "12345"
+ *                           name:
+ *                             type: string
+ *                             example: "John Doe"
+ *                           role:
+ *                             type: string
+ *                             example: "mentee"
+ *                           email:
+ *                             type: string
+ *                             example: "johndoe@example.com"
+ *                     - type: object
+ *                       properties:
+ *                         message:
+ *                           type: string
+ *                           example: "No mentees found"
+ *       400:
+ *         description: Failed to retrieve mentors or mentees.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Could not get data"
+ *       401:
+ *         description: Unauthorized access.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ */
+router.get("/mentor-mentee", user.getMyMentorsOrMentees);
 
+/**
+ * @swagger
+ * /user/mentors-mentees:
+ *   get:
+ *     summary: Retrieve a list of Mentors or Mentees
+ *     tags: [User Management]
+ *     description: Returns a list of all mentors or mentees based on the provided role (mentor or mentee).
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: role
+ *         in: query
+ *         required: true
+ *         description: Specify the role to retrieve (mentor or mentee).
+ *         schema:
+ *           type: string
+ *           enum: [mentor, mentee]
+ *           example: "mentor"
+ *       - name: fullName
+ *         in: query
+ *         required: false
+ *         description: Filter mentors or mentees based on a specific user name.
+ *         schema:
+ *           type: string
+ *           example: John Doe
+ *       - name: programOfStudy
+ *         in: query
+ *         required: false
+ *         description: Filter mentors or mentees based on a specific program of study.
+ *         schema:
+ *           type: string
+ *           example: computer science
+ *       - name: level
+ *         in: query
+ *         required: false
+ *         description: Filter mentors or mentees based on their level of study.
+ *         schema:
+ *           type: string
+ *           example: 400 or professional
+ *       - name: sort
+ *         in: query
+ *         required: false
+ *         description: sort mentors or mentees base on name, program of study, level, created or updated at.
+ *         schema:
+ *           type: string
+ *           example: createdAt
+ *       - name: limit
+ *         in: query
+ *         required: false
+ *         description: Limit the number of results returned.
+ *         schema:
+ *           type: integer
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: Specify the page number for paginated results.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved the list of mentors or mentees.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   oneOf:
+ *                     - type: array
+ *                       items:
+ *                         type: object
+ *                         properties:
+ *                           id:
+ *                             type: string
+ *                             example: "12345"
+ *                           name:
+ *                             type: string
+ *                             example: "Jane Doe"
+ *                           role:
+ *                             type: string
+ *                             example: "mentor"
+ *                           email:
+ *                             type: string
+ *                             example: "janedoe@example.com"
+ *                     - type: object
+ *                       properties:
+ *                         message:
+ *                           type: string
+ *                           example: "No mentors found"
+ *       400:
+ *         description: Failed to retrieve mentors or mentees.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Could not get mentors"
+ *       401:
+ *         description: Unauthorized access.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ */
 router.get('/mentors-mentees', user.getAllMentorsOrMentees);
 
+/**
+ * @swagger
+ * /user/delete:
+ *   delete:
+ *     summary: Delete a User
+ *     tags: [User Management]
+ *     description: Deletes a user based on the authenticated user's ID and returns the deleted user's profile data.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "12345"
+ *                     name:
+ *                       type: string
+ *                       example: "Jane Doe"
+ *                     email:
+ *                       type: string
+ *                       example: "janedoe@example.com"
+ *       400:
+ *         description: Failed to delete the user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unable to delete user"
+ *       401:
+ *         description: Unauthorized access.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ */
 router.delete('/delete', user.deleteUser);
 
 export default router;

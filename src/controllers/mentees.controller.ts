@@ -35,7 +35,7 @@ export const getMenteeRequests = async (req: Request, res: Response) => {
 };
 
 /**
- * 
+ * controlller for canceling mentorship request
  * @param req Request object
  * @param res Response object
  * @throws 400 if no request is found

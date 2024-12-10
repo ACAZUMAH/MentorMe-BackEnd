@@ -86,10 +86,10 @@ const getAllMentorsOrMentees = async (req, res) => {
 };
 exports.getAllMentorsOrMentees = getAllMentorsOrMentees;
 /**
- *
- * @param req
- * @param res
- * @returns
+ * controller for getting mentor mentees or mentee mentors
+ * @param req Request Object
+ * @param res Response Object
+ * @returns list of mentees for a mentor or mentors for a mentee
  */
 const getMyMentorsOrMentees = async (req, res) => {
     const user = req.user;
