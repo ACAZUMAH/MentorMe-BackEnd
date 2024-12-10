@@ -1,23 +1,25 @@
-import mentorship from '../../models/schemas/mentorshipRequest';
-import createHttpError from 'http-errors';
-import { idType } from '../types';
-import { Types } from 'mongoose';
+import mentorship from "../../models/schemas/mentorshipRequest";
+import createHttpError from "http-errors";
+import { idType } from "../types";
+import { Types } from "mongoose";
 
 /**
- * create a mentorship request to a mentor by mentee 
+ * create a mentorship request to a mentor by mentee
  * @param ids mentor and mentee ids
  * @returns requested mentorship
  * @throws 400 if id is invalid
  */
 export const requestMentorship = async (ids: idType) => {
-    if(Types.ObjectId.isValid(ids.mentorId) 
-        && Types.ObjectId.isValid(ids.menteeId)){
-        const request = mentorship.create({
-            ...ids
-        });
-        return request;
-    };
-    throw new createHttpError.BadRequest('Invalid mentor or mentee id');
+  if (
+    Types.ObjectId.isValid(ids.mentorId) &&
+    Types.ObjectId.isValid(ids.menteeId)
+  ) {
+    const request = mentorship.create({
+      ...ids,
+    });
+    return request;
+  }
+  throw new createHttpError.BadRequest("Invalid mentor or mentee id");
 };
 
 /**
@@ -25,17 +27,20 @@ export const requestMentorship = async (ids: idType) => {
  * @param id mentee id or mentor id
  * @returns list of mentorship requests
  */
-export const findRequests = async (id: string | Types.ObjectId, page: string) => {
-    if(!Types.ObjectId.isValid(id)){
-        throw new createHttpError.BadRequest('Invalid mentee id');
-    };
-    let result = mentorship.find({ $or: [{ menteeId: id }, { mentorId: id }] });
-    result = result.sort('createdAt');
-    const pages = Number(page) || 1;
-    const limit = 10;
-    const skip = (pages - 1) * limit;
-    result = result.skip(skip).limit(limit);
-    return await result;
+export const findRequests = async (
+  id: string | Types.ObjectId,
+  page: string
+) => {
+  if (!Types.ObjectId.isValid(id)) {
+    throw new createHttpError.BadRequest("Invalid mentee id");
+  }
+  let result = mentorship.find({ $or: [{ menteeId: id }, { mentorId: id }] });
+  result = result.sort("createdAt");
+  const pages = Number(page) || 1;
+  const limit = 10;
+  const skip = (pages - 1) * limit;
+  result = result.skip(skip).limit(limit);
+  return await result;
 };
 
 /**
@@ -44,19 +49,21 @@ export const findRequests = async (id: string | Types.ObjectId, page: string) =>
  * @returns accepted request
  */
 export const acceptRequest = async (ids: idType) => {
-    if(!Types.ObjectId.isValid(ids.mentorId) || 
-       !Types.ObjectId.isValid(ids.menteeId)){
-        throw new createHttpError.BadRequest('Invalid mentor or mentee id');
-    };
-    const request = await mentorship.findOneAndUpdate(
-        { mentorId: ids.mentorId, menteeId: ids.menteeId }, 
-        { status: 'accepted' },
-        { new: true }
-    );
-    if(!request){
-        throw new createHttpError.NotFound('No request found');
-    };
-    return request;
+  if (
+    !Types.ObjectId.isValid(ids.mentorId) ||
+    !Types.ObjectId.isValid(ids.menteeId)
+  ) {
+    throw new createHttpError.BadRequest("Invalid mentor or mentee id");
+  }
+  const request = await mentorship.findOneAndUpdate(
+    { mentorId: ids.mentorId, menteeId: ids.menteeId },
+    { status: "accepted" },
+    { new: true }
+  );
+  if (!request) {
+    throw new createHttpError.NotFound("No request found");
+  }
+  return request;
 };
 
 /**
@@ -65,26 +72,30 @@ export const acceptRequest = async (ids: idType) => {
  * @returns rejected request
  */
 export const rejectRequest = async (ids: idType) => {
-    if(!Types.ObjectId.isValid(ids.mentorId) || 
-       !Types.ObjectId.isValid(ids.menteeId)){
-        throw new createHttpError.BadRequest('Invalid mentor or mentee id');
-    };
-    const request = await mentorship.findOneAndUpdate(
-        { mentorId: ids.mentorId, menteeId: ids.menteeId }, 
-        { status: 'rejected' },
-        { new: true }
-    );
-    if(!request){
-        throw new createHttpError.NotFound('No request found');
-    };
-    return request;
+  if (
+    !Types.ObjectId.isValid(ids.mentorId) ||
+    !Types.ObjectId.isValid(ids.menteeId)
+  ) {
+    throw new createHttpError.BadRequest("Invalid mentor or mentee id");
+  }
+  const request = await mentorship.findOneAndUpdate(
+    { mentorId: ids.mentorId, menteeId: ids.menteeId },
+    { status: "rejected" },
+    { new: true }
+  );
+  if (!request) {
+    throw new createHttpError.NotFound("No request found");
+  }
+  return request;
 };
 
 /**
- * 
- * @param id 
+ * delete mentorship request from the database when a request is canceled
+ * @param menteeId mentee's id
+ * @param requestId id of the request to be canceled
+ * @returns canceled request
  */
-export const CancelRequest = async (menteeId: string, requestId: string ) => {
+export const CancelRequest = async (menteeId: string, requestId: string) => {
   if (!Types.ObjectId.isValid(menteeId) || !Types.ObjectId.isValid(requestId)) {
     throw new createHttpError.BadRequest("Invalid user or request id");
   }
@@ -96,4 +107,25 @@ export const CancelRequest = async (menteeId: string, requestId: string ) => {
     throw new createHttpError.BadRequest("No request found");
   }
   return cancel;
+};
+
+/**
+ * delete all requests by provided mentor or mentee id
+ * @param ids mentor or mentee id
+ * @returns boolean true
+ */
+export const deleteAllRequest = async (
+  menteeId?: string | Types.ObjectId,
+  mentorId?: string | Types.ObjectId
+) => {
+    if(menteeId && !Types.ObjectId.isValid(menteeId)){
+        throw new createHttpError.BadRequest('Invalid mentee id')
+    };
+    if(mentorId && !Types.ObjectId.isValid(mentorId)){
+        throw new createHttpError.BadRequest('Invalid mentor id')
+    };
+    await mentorship.findByIdAndDelete({
+       $or: [{ menteeId: menteeId, mentorId: mentorId }]
+    });
+    return true;
 };

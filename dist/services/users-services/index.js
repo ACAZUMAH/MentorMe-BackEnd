@@ -44,6 +44,7 @@ const validateUserData_1 = require("./validateUserData");
 const auth_services_1 = require("../auth-services");
 const helpers_1 = require("../../helpers");
 const filter_1 = __importDefault(require("../filters/filter"));
+const mentorship = __importStar(require("../mentoship-services/mentorship"));
 const Mentor = __importStar(require("../mentors-services/index"));
 const Mentee = __importStar(require("../mentees-services/index"));
 /**
@@ -59,6 +60,7 @@ const createUser = async (data) => {
     if (!user) {
         throw new http_errors_1.default.InternalServerError('Could not create user');
     }
+    ;
     await (0, auth_services_1.createAuth)(user._id);
     return user;
 };
@@ -74,6 +76,7 @@ const createGoogleUser = async (data) => {
     if (!user) {
         throw new http_errors_1.default.InternalServerError('Could not create user');
     }
+    ;
     return user;
 };
 exports.createGoogleUser = createGoogleUser;
@@ -190,10 +193,12 @@ const findUserByIdAndDelete = async (id) => {
     ;
     if (user.role === 'Mentor') {
         await Mentor.deleteMentorData(id);
+        await mentorship.deleteAllRequest(id);
     }
     ;
     if (user.role === 'Mentee') {
         await Mentee.deleteMenteeData(id);
+        await mentorship.deleteAllRequest(id);
     }
     ;
     return user;

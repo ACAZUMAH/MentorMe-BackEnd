@@ -370,6 +370,56 @@ router.post('/forget-password', auth.forgotPassword);
  */
 router.post('/new-password', verifyAccessToken, auth.newPassword);
 
+/**
+ * @swagger
+ * /auth/logout:
+ *   get:
+ *     summary: Log Out a User
+ *     tags: [Authentication]
+ *     description: Logs out an authenticated user by updating their authentication status and blacklisting their token.
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User logged out successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Logged out successfully"
+ *       401:
+ *         description: Unauthorized access.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       500:
+ *         description: Server error while processing logout.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal Server Error"
+ */
 router.get('/logout', verifyAccessToken, auth.logOut);
 
 export default router;

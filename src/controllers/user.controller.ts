@@ -54,10 +54,10 @@ export const getAllMentorsOrMentees = async (req: Request, res: Response) => {
 };
 
 /**
- * 
- * @param req 
- * @param res 
- * @returns 
+ * controller for getting mentor mentees or mentee mentors
+ * @param req Request Object
+ * @param res Response Object
+ * @returns list of mentees for a mentor or mentors for a mentee
  */
 export const getMyMentorsOrMentees = async (req: Request, res: Response) => {
     const user: any = req.user;

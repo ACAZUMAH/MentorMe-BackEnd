@@ -7,6 +7,7 @@ import { createAuth } from "../auth-services";
 import { hashPassword } from "../../helpers";
 import filterQuery from "../filters/filter";
 import { queryType } from "../types";
+import * as mentorship from '../mentoship-services/mentorship'
 import * as Mentor from '../mentors-services/index'
 import * as Mentee from '../mentees-services/index'
 
@@ -23,7 +24,7 @@ export const createUser = async (data: userType) => {
     const user = await User.create({ ...data, password: hashedPassword });
     if (!user) {
         throw new createHttpError.InternalServerError('Could not create user');
-    }
+    };
     await createAuth(user._id);
     return user;
 };
@@ -38,7 +39,7 @@ export const createGoogleUser = async (data: userType) => {
     const user = await User.create({ ...data });
     if (!user) {
         throw new createHttpError.InternalServerError('Could not create user');
-    }
+    };
     return user;
 };
 
@@ -149,9 +150,11 @@ export const findUserByIdAndDelete = async (id: string | Types.ObjectId) => {
     };
     if(user.role === 'Mentor'){
         await Mentor.deleteMentorData(id);
+        await mentorship.deleteAllRequest(id)
     };
     if(user.role === 'Mentee'){
         await Mentee.deleteMenteeData(id);
+        await mentorship.deleteAllRequest(id)
     };
     return user;
 };
