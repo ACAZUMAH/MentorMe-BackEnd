@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const mentorschema = new mongoose_1.default.Schema({
     mentorId: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' },
-    mentees: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Mentee' }]
+    mentees: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: 'User' }]
 }, { timestamps: true });
 const mentor = mongoose_1.default.model('Mentor', mentorschema);
 exports.default = mentor;

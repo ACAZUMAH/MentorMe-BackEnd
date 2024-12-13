@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteMenteeData = exports.addMentor = exports.getMenteeData = void 0;
+exports.findBookmarkedResources = exports.bookmarkResource = exports.deleteMenteeData = exports.addMentor = exports.getMenteeData = void 0;
 const mentees_1 = __importDefault(require("../../models/schemas/mentees"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const mongoose_1 = require("mongoose");
@@ -63,3 +63,40 @@ const deleteMenteeData = async (id) => {
     return true;
 };
 exports.deleteMenteeData = deleteMenteeData;
+/**
+ * adding a resources to the bookmark
+ * @param menteeId mentee's id
+ * @param resourceId resource's id
+ * @returns boolean true if bookmarked
+ */
+const bookmarkResource = async (menteeId, resourceId) => {
+    if (!mongoose_1.Types.ObjectId.isValid(menteeId) ||
+        !mongoose_1.Types.ObjectId.isValid(resourceId)) {
+        throw new http_errors_1.default.BadRequest("Invalid id");
+    }
+    const bookmark = await mentees_1.default.findOneAndUpdate({ menteeId: menteeId }, { bookmarks: { resourcesIds: [resourceId] } }, { new: true });
+    if (!bookmark) {
+        throw new http_errors_1.default.BadRequest('Unable to bookmark resource');
+    }
+    return true;
+};
+exports.bookmarkResource = bookmarkResource;
+/**
+ *
+ * @param id
+ * @returns
+ */
+const findBookmarkedResources = async (id) => {
+    if (!mongoose_1.Types.ObjectId.isValid(id)) {
+        throw new http_errors_1.default.BadRequest('Invalid mentee id');
+    }
+    ;
+    const bookmarked = await mentees_1.default.findOne({ menteeId: id });
+    //console.log(bookmarked)
+    if (!bookmarked.bookmarks) {
+        throw new http_errors_1.default.NotFound('No bookmarked resources found');
+    }
+    ;
+    return bookmarked.bookmarks;
+};
+exports.findBookmarkedResources = findBookmarkedResources;

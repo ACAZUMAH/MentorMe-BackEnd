@@ -2,7 +2,7 @@
  * @swagger
  * tags:
  *   - name: Mentor Management
- *     description: Routes for managing menoter services.
+ *     description: Routes for managing mentor services.
  */
 import { Router } from "express";
 import * as mentor from "../controllers/mentors.controller";
@@ -251,5 +251,277 @@ router.put("/accept/:id", mentor.acceptRequest);
  *                   example: "Internal Server Error"
  */
 router.put("/reject/:id", mentor.rejectRequest);
+
+/**
+ * @swagger
+ * /mentor/resources:
+ *   post:
+ *     summary: Upload Resources
+ *     description: Allows a mentor to upload resources for mentees.
+ *     tags: [Mentor Management]
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: "Introduction to Node.js"
+ *               resources_url:
+ *                 type: string
+ *                 example: "https://example.com/resources/nodejs"
+ *             required:
+ *               - title
+ *               - resources_url
+ *     responses:
+ *       201:
+ *         description: Resource uploaded successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     uploadedBy:
+ *                       type: string
+ *                       example: "mentor456"
+ *                     title:
+ *                       type: string
+ *                       example: "Introduction to Node.js"
+ *                     resources_url:
+ *                       type: string
+ *                       example: "https://example.com/resources/nodejs"
+ *       400:
+ *         description: Bad Request - Missing or invalid input.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid input data"
+ *       401:
+ *         description: Unauthorized - User is not authenticated.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       500:
+ *         description: Internal Server Error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal Server Error"
+ */
+router.post('/resources', mentor.uploadResources);
+
+/**
+ * @swagger
+ * /mentor/resources:
+ *   get:
+ *     summary: Get Uploaded Resources
+ *     description: Allows a mentor to retrieve all the resources they have uploaded.
+ *     tags:
+ *       - Mentor Management
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: The page number for pagination.
+ *         schema:
+ *           type: integer
+ *           example: 1
+ *       - name: limit
+ *         in: query
+ *         required: false
+ *         description: The number of results per page.
+ *         schema:
+ *           type: integer
+ *           example: 10
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved uploaded resources.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                         example: "resource123"
+ *                       uploadedBy:
+ *                         type: string
+ *                         example: "mentor456"
+ *                       title:
+ *                         type: string
+ *                         example: "Introduction to Node.js"
+ *                       resources_url:
+ *                         type: string
+ *                         example: "https://example.com/resources/nodejs"
+ *       404:
+ *         description: No resources found for the mentor.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "You have no uploaded resources yet"
+ *       401:
+ *         description: Unauthorized - User is not authenticated.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       500:
+ *         description: Internal Server Error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal Server Error"
+ */
+router.get('/resources', mentor.getMentorUploadedResources);
+
+/**
+ * @swagger
+ * /mentor/resources/{id}:
+ *   delete:
+ *     summary: Delete Uploaded Resource
+ *     description: Allows a mentor to delete an uploaded resource by its ID.
+ *     tags:
+ *       - Mentor Management
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: The ID of the resource to delete.
+ *         schema:
+ *           type: string
+ *           example: "resource123"
+ *     responses:
+ *       200:
+ *         description: Resource successfully deleted.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                       example: "resource123"
+ *                     uploadedBy:
+ *                       type: string
+ *                       example: "mentor456"
+ *                     title:
+ *                       type: string
+ *                       example: "Introduction to Node.js"
+ *                     resources_url:
+ *                       type: string
+ *                       example: "https://example.com/resources/nodejs"
+ *       404:
+ *         description: Resource not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Resources not found"
+ *       401:
+ *         description: Unauthorized - User is not authenticated.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       500:
+ *         description: Internal Server Error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal Server Error"
+ */
+router.delete('/resources/:id', mentor.deleteResources);
+
 
 export default router;

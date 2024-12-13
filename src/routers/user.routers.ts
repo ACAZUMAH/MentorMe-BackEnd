@@ -99,6 +99,96 @@ router.patch('/profile', user.updateProfile);
 
 /**
  * @swagger
+ * /user/profile:
+ *   get:
+ *     summary: Get User Profile
+ *     description: Retrieves the profile details of the authenticated user.
+ *     tags:
+ *       - User Management
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user profile.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                       example: "user123"
+ *                     name:
+ *                       type: string
+ *                       example: "John Doe"
+ *                     email:
+ *                       type: string
+ *                       example: "johndoe@example.com"
+ *                     role:
+ *                       type: string
+ *                       example: "mentee"
+ *                     programmeofStudy: 
+ *                       type: string
+ *                       example: "statistics"
+ *                     level:
+ *                       type: string
+ *                       example: "400"
+ *                     about:
+ *                       type: string
+ *                       example: "Financial analyst with expertise in investment strategies and risk"
+ *                     acadamicFields: 
+ *                       type: array
+ *                       example: ["science", "analysis"]
+ *       400:
+ *         description: No profile found for the user.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "No profile found"
+ *       401:
+ *         description: Unauthorized - User not authenticated.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Unauthorized"
+ *       500:
+ *         description: Internal Server Error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Internal Server Error"
+ */
+router.get('/profile', user.getProfile)
+
+/**
+ * @swagger
  * /user/mentor-mentee:
  *   get:
  *     summary: Retrieve mentee Mentors or mentor Mentees

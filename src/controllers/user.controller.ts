@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as services from "../services/users-services/index";
+import createHttpError from "http-errors";
 
 /**
  * update a user's profile data by id
@@ -16,6 +17,21 @@ export const updateProfile = async (req: Request, res: Response) => {
         return res.status(200).json({ success: true, data: data });
     }
     return res.status(400).json({ success: false, message: 'Unable to update profile' });
+};
+
+/**
+ * 
+ * @param req Request object
+ * @param res Response object
+ * @returns 
+ */
+export const getProfile = async (req: Request, res: Response) => {
+    const user: any = req.user;
+    const profile = await services.findUserById(user.id);
+    if(!profile){
+        throw new createHttpError.BadRequest('No profile found');
+    };
+    return res.status(200).json({ success: true, data: profile});
 };
 
 /**
@@ -40,6 +56,7 @@ export const deleteUser = async (req: Request, res: Response) => {
  * @returns found list of mentors or mentees
  */
 export const getAllMentorsOrMentees = async (req: Request, res: Response) => {
+    
     const data = await services.findAllMentorsOrMentees({ ...req.query as any });
     
     if(data) {
@@ -61,15 +78,20 @@ export const getAllMentorsOrMentees = async (req: Request, res: Response) => {
  */
 export const getMyMentorsOrMentees = async (req: Request, res: Response) => {
     const user: any = req.user;
-    const data = await services.getMyMentorsOrMentees(user.id, { ...req.query as any });
-    if (data) {
-        return res.status(200).json(
-            { 
-                success: true, 
-                data: data.length > 0 ? data : { message: `No mentees found` } 
-            }
-        );
+    const userData: any = await services.findUserById(user.id)
+    if(userData.role === 'Mentor'){
+        const mentees = await services.getMyMentees(user.id, { ...req.query });
+        return res.status(200).json({ success: true, data: mentees })
     };
-    return res.status(400).json({ success: false, message: `Could not get data` });
+    if(userData.role === 'Mentee'){
+        const mentors = await services.getMyMentors(user.id, { ...req.query });
+        return res.status(200).json({ success: true, data: mentors });
+    };
+    res.status(200).json({ 
+        success: false,
+        message: userData.role === 'Mentor' 
+        ? 'Could not find mentees'
+        : 'Could not find mentors'
+    });
 };
 

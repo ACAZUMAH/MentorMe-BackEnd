@@ -11,11 +11,11 @@ import { idType } from "../types";
  */
 export const getMentorData = async (id: string | Types.ObjectId) => {
     if(!Types.ObjectId.isValid(id)){
-        return  new createHttpError.BadRequest('Invalid mentor id');
+        throw new createHttpError.BadRequest('Invalid mentor id');
     };
     const mentorData: any = await mentor.findOne({ mentorId: id });
     if(!mentorData){
-        return new createHttpError.NotFound('No mentees found');
+        throw new createHttpError.NotFound('No mentees found');
     };
     return mentorData;
 };
@@ -30,7 +30,7 @@ export const getMentorData = async (id: string | Types.ObjectId) => {
 export const addMentee = async (ids: idType) => {
     if(!Types.ObjectId.isValid(ids.mentorId) || 
        !Types.ObjectId.isValid(ids.menteeId)){
-        return new createHttpError.BadRequest('Invalid mentor or mentee id');
+        throw new createHttpError.BadRequest('Invalid mentor or mentee id');
     };
     const mentorData = await mentor.findOneAndUpdate(
         { mentorId: ids.mentorId },
@@ -52,7 +52,7 @@ export const addMentee = async (ids: idType) => {
  */
 export const deleteMentorData = async (id: string | Types.ObjectId) => {
     if(!Types.ObjectId.isValid(id)){
-        return new createHttpError.BadRequest("Invalid user's id");
+        throw new createHttpError.BadRequest("Invalid user's id");
     };
     await mentor.findByIdAndDelete(id);
     return true;

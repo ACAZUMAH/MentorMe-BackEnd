@@ -45,18 +45,21 @@ export const validateProfileData = async (data: userType) => {
     addFormat(ajv);
 
     const schema = {
-        type: 'object',
-        properties: {
-            fullName: { type: 'string', maxLength: 100 },
-            profile_url: { type: 'string', format: 'uri' },
-            email: { type: 'string', format: 'email' },
-            role: { type: 'string' },
-            programmeOfStudy: { type: 'string' },
-            level: { type: 'string' },
-            about: { type: 'string', maxLength: 250 },
-            acadamicFields: { type: 'string' },
-            password: { type: 'string' },
-        }
+      type: "object",
+      properties: {
+        fullName: { type: "string", maxLength: 100 },
+        profile_url: { type: "string", format: "uri" },
+        email: { type: "string", format: "email" },
+        role: { type: "string" },
+        programmeOfStudy: { type: "string" },
+        level: { type: "string" },
+        about: { type: "string", maxLength: 250 },
+        acadamicFields: { 
+            type: "array", 
+            items: { type: "string" } 
+        },
+        password: { type: "string" },
+      },
     };
     const validate = ajv.compile(schema);
     const isValid = validate(data);

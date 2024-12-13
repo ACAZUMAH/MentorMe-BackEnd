@@ -36,8 +36,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cancelMentorshipRequest = exports.getMenteeRequests = exports.menteeRequestMentorship = void 0;
+exports.getBookmarkedResources = exports.bookmarkResources = exports.getUploadedResources = exports.cancelMentorshipRequest = exports.getMenteeRequests = exports.menteeRequestMentorship = void 0;
 const services = __importStar(require("../services/mentoship-services/mentorship"));
+const resource = __importStar(require("../services/resources/index"));
+const mentees = __importStar(require("../services/mentees-services"));
 const http_errors_1 = __importDefault(require("http-errors"));
 /**
  * controller for requesting mentorship from a mentor
@@ -88,3 +90,65 @@ const cancelMentorshipRequest = async (req, res) => {
     return res.status(200).json({ success: true, data: cancel });
 };
 exports.cancelMentorshipRequest = cancelMentorshipRequest;
+/**
+ * controller for getting uploaded resources
+ * @param req Request object
+ * @param res Response object
+ * @returns uploded resources
+ * @throws 404 if no resources found
+ */
+const getUploadedResources = async (req, res) => {
+    const user = req.user;
+    const resources = [];
+    const data = await resource.getGeneralResources({ ...req.query });
+    const forwaded = await resource.getforwardedResources(user.id, { ...req.query });
+    if (data.length === 0 && forwaded.length === 0) {
+        throw new http_errors_1.default.NotFound("No uploaded resources found");
+    }
+    ;
+    if (data.length !== 0) {
+        resources.push(data);
+    }
+    ;
+    if (forwaded.length !== 0) {
+        resources.push(forwaded);
+    }
+    ;
+    return res.status(200).json({ success: true, data: resources });
+};
+exports.getUploadedResources = getUploadedResources;
+/**
+ *
+ * @param req Request object
+ * @param res Response object
+ * @returns
+ */
+const bookmarkResources = async (req, res) => {
+    const user = req.user;
+    const bookmarked = await mentees.bookmarkResource(user.id, req.params.id);
+    if (bookmarked) {
+        return res.status(200).json({ success: true, bookmark: 'bookmarked' });
+    }
+    ;
+    return res.status(400).json({ success: false, message: 'Unable to bookmark resources' });
+};
+exports.bookmarkResources = bookmarkResources;
+/**
+ *
+ * @param req Request object
+ * @param res Response object
+ * @returns
+ */
+const getBookmarkedResources = async (req, res) => {
+    const user = req.user;
+    const bookmarkList = await mentees.findBookmarkedResources(user.id);
+    const bookmarkedResources = await resource.findResourcesByIds(bookmarkList.resourcesIds);
+    if (!bookmarkedResources) {
+        throw new http_errors_1.default.NotFound('No bookmarekd resources yet');
+    }
+    ;
+    return res
+        .status(200)
+        .json({ success: true, bookmarked: bookmarkedResources });
+};
+exports.getBookmarkedResources = getBookmarkedResources;

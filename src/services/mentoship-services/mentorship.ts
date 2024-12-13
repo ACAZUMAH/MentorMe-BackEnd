@@ -99,7 +99,7 @@ export const CancelRequest = async (menteeId: string, requestId: string) => {
   if (!Types.ObjectId.isValid(menteeId) || !Types.ObjectId.isValid(requestId)) {
     throw new createHttpError.BadRequest("Invalid user or request id");
   }
-  const cancel = await mentorship.findByIdAndDelete({
+  const cancel = await mentorship.findOneAndDelete({
     _id: requestId,
     menteeId,
   });

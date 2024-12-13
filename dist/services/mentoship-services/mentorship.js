@@ -86,7 +86,7 @@ const CancelRequest = async (menteeId, requestId) => {
     if (!mongoose_1.Types.ObjectId.isValid(menteeId) || !mongoose_1.Types.ObjectId.isValid(requestId)) {
         throw new http_errors_1.default.BadRequest("Invalid user or request id");
     }
-    const cancel = await mentorshipRequest_1.default.findByIdAndDelete({
+    const cancel = await mentorshipRequest_1.default.findOneAndDelete({
         _id: requestId,
         menteeId,
     });

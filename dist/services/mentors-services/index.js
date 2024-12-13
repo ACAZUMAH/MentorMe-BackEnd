@@ -14,12 +14,12 @@ const mongoose_1 = require("mongoose");
  */
 const getMentorData = async (id) => {
     if (!mongoose_1.Types.ObjectId.isValid(id)) {
-        return new http_errors_1.default.BadRequest('Invalid mentor id');
+        throw new http_errors_1.default.BadRequest('Invalid mentor id');
     }
     ;
     const mentorData = await mentors_1.default.findOne({ mentorId: id });
     if (!mentorData) {
-        return new http_errors_1.default.NotFound('No mentees found');
+        throw new http_errors_1.default.NotFound('No mentees found');
     }
     ;
     return mentorData;
@@ -35,7 +35,7 @@ exports.getMentorData = getMentorData;
 const addMentee = async (ids) => {
     if (!mongoose_1.Types.ObjectId.isValid(ids.mentorId) ||
         !mongoose_1.Types.ObjectId.isValid(ids.menteeId)) {
-        return new http_errors_1.default.BadRequest('Invalid mentor or mentee id');
+        throw new http_errors_1.default.BadRequest('Invalid mentor or mentee id');
     }
     ;
     const mentorData = await mentors_1.default.findOneAndUpdate({ mentorId: ids.mentorId }, { $push: { mentees: ids.menteeId } }, { new: true });
@@ -53,7 +53,7 @@ exports.addMentee = addMentee;
  */
 const deleteMentorData = async (id) => {
     if (!mongoose_1.Types.ObjectId.isValid(id)) {
-        return new http_errors_1.default.BadRequest("Invalid user's id");
+        throw new http_errors_1.default.BadRequest("Invalid user's id");
     }
     ;
     await mentors_1.default.findByIdAndDelete(id);
