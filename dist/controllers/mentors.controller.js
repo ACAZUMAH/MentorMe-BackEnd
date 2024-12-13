@@ -36,11 +36,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.rejectRequest = exports.acceptRequest = exports.getMentorshipRequests = void 0;
+exports.deleteResources = exports.getMentorUploadedResources = exports.uploadResources = exports.rejectRequest = exports.acceptRequest = exports.getMentorshipRequests = void 0;
 const http_errors_1 = __importDefault(require("http-errors"));
 const mentees_services_1 = require("../services/mentees-services");
 const mentor = __importStar(require("../services/mentors-services"));
 const services = __importStar(require("../services/mentoship-services/mentorship"));
+const resources = __importStar(require("../services/resources/index"));
 /**
  * controller for geting mentorship requests by mentor id
  * @param req Request object
@@ -51,8 +52,9 @@ const getMentorshipRequests = async (req, res) => {
     const user = req.user;
     const data = await services.findRequests(user.id, req.query.page);
     if (!data) {
-        return new http_errors_1.default.BadRequest('No mentorship requests found');
+        throw new http_errors_1.default.BadRequest('No mentorship requests found');
     }
+    ;
     return res.status(200).json({ success: true, data: data });
 };
 exports.getMentorshipRequests = getMentorshipRequests;
@@ -66,8 +68,9 @@ const acceptRequest = async (req, res) => {
     const user = req.user;
     const data = await services.acceptRequest({ mentorId: user.id, menteeId: req.params.id });
     if (!data) {
-        return new http_errors_1.default.BadRequest('Unable to accept request');
+        throw new http_errors_1.default.BadRequest('Unable to accept request');
     }
+    ;
     mentor.addMentee({ mentorId: user.id, menteeId: req.params.id });
     (0, mentees_services_1.addMentor)({ mentorId: user.id, menteeId: req.params.id });
     return res.status(200).json({ success: true, data: data });
@@ -83,8 +86,51 @@ const rejectRequest = async (req, res) => {
     const user = req.user;
     const data = await services.rejectRequest({ mentorId: user.id, menteeId: req.params.id });
     if (!data) {
-        return new http_errors_1.default.BadRequest('Unable to reject request');
+        throw new http_errors_1.default.BadRequest('Unable to reject request');
     }
+    ;
     return res.status(200).json({ success: true, data: data });
 };
 exports.rejectRequest = rejectRequest;
+/**
+ * controller for uploading resources
+ * @param req Request object
+ * @param res Reponse object
+ * @returns uploaded resources
+ */
+const uploadResources = async (req, res) => {
+    const user = req.user;
+    const upload = await resources.createResource({ mentorId: user.id, ...req.body });
+    return res.status(201).json({ success: true, data: upload });
+};
+exports.uploadResources = uploadResources;
+/**
+ * controller for menotr to get uploaded resources
+ * @param req Request object
+ * @param res Response object
+ * @returns uploaded resources
+ */
+const getMentorUploadedResources = async (req, res) => {
+    const user = req.user;
+    const data = await resources.getUploadedResourcesBymentorId(user.id, { ...req.query });
+    if (!data) {
+        throw new http_errors_1.default.NotFound('You have no uploaded resources yet');
+    }
+    ;
+    return res.status(200).json({ success: true, data: data });
+};
+exports.getMentorUploadedResources = getMentorUploadedResources;
+/**
+ *
+ * @param req
+ * @param res
+ */
+const deleteResources = async (req, res) => {
+    const user = req.user;
+    const deleted = await resources.deleteUploadResource(req.params.id, user.id);
+    if (!deleted) {
+        throw new http_errors_1.default.NotFound('Resources not found');
+    }
+    res.status(200).json({ success: true, data: deleted });
+};
+exports.deleteResources = deleteResources;

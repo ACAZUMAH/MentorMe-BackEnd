@@ -9,7 +9,7 @@ const usersSchema = new mongoose.Schema({
     programmeOfStudy: { type: String },
     level: { type: String },
     about: { type: String, maxlength: 250},
-    acadamicFields: { type: String },
+    acadamicFields: [{ type: String }],
     password: { type: String  },
     isAuthenticated: { type: Boolean, default: false }
 }, { timestamps: true });

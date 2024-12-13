@@ -34,6 +34,12 @@ export interface idType {
     mentorId: string | Types.ObjectId;
 };
 
+export interface resourceType {
+    mentorId?: string | Types.ObjectId;
+    resources_url: string;
+    forward_to_mentees?: string[];
+};
+
 export {
 
 };

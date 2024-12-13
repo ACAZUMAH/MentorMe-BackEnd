@@ -1,5 +1,4 @@
 import mentee from "../../models/schemas/mentees";
-import User from "../../models/schemas/usersSchema";
 import createHttpError from "http-errors";
 import { idType } from "../types";
 import { Types } from "mongoose";
@@ -59,4 +58,48 @@ export const deleteMenteeData = async (id: string | Types.ObjectId) => {
     };
     await mentee.findByIdAndDelete(id);
     return true;
+};
+
+/**
+ * adding a resources to the bookmark
+ * @param menteeId mentee's id
+ * @param resourceId resource's id
+ * @returns boolean true if bookmarked
+ */
+export const bookmarkResource = async (
+  menteeId: string | Types.ObjectId,
+  resourceId: string | Types.ObjectId
+) => {
+  if (
+    !Types.ObjectId.isValid(menteeId) ||
+    !Types.ObjectId.isValid(resourceId)
+  ) {
+    throw new createHttpError.BadRequest("Invalid id");
+  }
+  const bookmark = await mentee.findOneAndUpdate(
+    { menteeId: menteeId },
+    { bookmarks: { resourcesIds: [resourceId] } },
+    { new: true }
+  );
+  if (!bookmark) {
+    throw new createHttpError.BadRequest('Unable to bookmark resource')
+  }
+  return true;
+};
+
+/**
+ * 
+ * @param id 
+ * @returns 
+ */
+export const findBookmarkedResources = async (id: string | Types.ObjectId) => {
+    if(!Types.ObjectId.isValid(id)) {
+        throw new createHttpError.BadRequest('Invalid mentee id');
+    };
+    const bookmarked: any = await mentee.findOne({ menteeId: id });
+    //console.log(bookmarked)
+    if(!bookmarked.bookmarks){
+        throw new createHttpError.NotFound('No bookmarked resources found');
+    };
+    return bookmarked.bookmarks;
 };
