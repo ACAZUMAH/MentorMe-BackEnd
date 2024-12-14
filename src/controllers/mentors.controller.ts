@@ -66,7 +66,7 @@ export const rejectRequest = async (req: Request, res: Response) => {
  */
 export const uploadResources = async (req: Request, res: Response) => {
     const user: any = req.user;
-    const upload = await resources.createResource({ mentorId: user.id, ...req.body });
+    const upload = await resources.createResource({ uploadedBy: user.id, ...req.body });
     return res.status(201).json({ success: true, data: upload });
 };
 
@@ -79,7 +79,7 @@ export const uploadResources = async (req: Request, res: Response) => {
 export const getMentorUploadedResources = async (req: Request, res: Response) => {
     const user: any = req.user;
     const data = await resources.getUploadedResourcesBymentorId(user.id, { ...req.query });
-    if(!data){
+    if(data.length === 0){
         throw new createHttpError.NotFound('You have no uploaded resources yet');
     };
     return res.status(200).json({ success: true, data: data });

@@ -5,7 +5,7 @@ import client from '../../models/connect/redis';
  * @param token token to be blacklisted
  */
 export const blacklistToken = async (token: string) => {
-    await client.setEx('blacklisted', 3600 * 2, token);
+    await client.setEx('blacklisted', 3600 * 24, token);
 };
 
 /**

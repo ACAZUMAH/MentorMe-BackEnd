@@ -35,9 +35,16 @@ export interface idType {
 };
 
 export interface resourceType {
-    mentorId?: string | Types.ObjectId;
+    uploadedBy?: string | Types.ObjectId;
+    title: string;
     resources_url: string;
     forward_to_mentees?: string[];
+};
+
+export interface resourceQuery {
+    page?: number;
+    limit?: number;
+    title?: string | object;
 };
 
 export {

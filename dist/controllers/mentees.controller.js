@@ -36,7 +36,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getBookmarkedResources = exports.bookmarkResources = exports.getUploadedResources = exports.cancelMentorshipRequest = exports.getMenteeRequests = exports.menteeRequestMentorship = void 0;
+exports.removeBookMarkedResource = exports.getBookmarkedResources = exports.bookmarkResources = exports.getUploadedResources = exports.getMentorMeResources = exports.cancelMentorshipRequest = exports.getMenteeRequests = exports.menteeRequestMentorship = void 0;
 const services = __importStar(require("../services/mentoship-services/mentorship"));
 const resource = __importStar(require("../services/resources/index"));
 const mentees = __importStar(require("../services/mentees-services"));
@@ -91,30 +91,37 @@ const cancelMentorshipRequest = async (req, res) => {
 };
 exports.cancelMentorshipRequest = cancelMentorshipRequest;
 /**
- * controller for getting uploaded resources
+ * controller for getting uploaded resources by MentorMe
  * @param req Request object
  * @param res Response object
  * @returns uploded resources
  * @throws 404 if no resources found
  */
-const getUploadedResources = async (req, res) => {
+const getMentorMeResources = async (req, res) => {
     const user = req.user;
-    const resources = [];
     const data = await resource.getGeneralResources({ ...req.query });
-    const forwaded = await resource.getforwardedResources(user.id, { ...req.query });
-    if (data.length === 0 && forwaded.length === 0) {
+    if (data.length === 0) {
         throw new http_errors_1.default.NotFound("No uploaded resources found");
     }
     ;
-    if (data.length !== 0) {
-        resources.push(data);
+    return res.status(200).json({ success: true, data: data });
+};
+exports.getMentorMeResources = getMentorMeResources;
+/**
+ * controller for getting resources shared by mentor
+ * @param req Request object
+ * @param res Response object
+ * @returns mentor uploaded resources
+ * @throws 404 if no resources found
+ */
+const getUploadedResources = async (req, res) => {
+    const user = req.user;
+    const forwarded = await resource.getforwardedResources(user.id, { ...req.query });
+    if (forwarded.length === 0) {
+        throw new http_errors_1.default.NotFound("No uploaded resources found");
     }
     ;
-    if (forwaded.length !== 0) {
-        resources.push(forwaded);
-    }
-    ;
-    return res.status(200).json({ success: true, data: resources });
+    return res.status(200).json({ success: true, data: forwarded });
 };
 exports.getUploadedResources = getUploadedResources;
 /**
@@ -152,3 +159,19 @@ const getBookmarkedResources = async (req, res) => {
         .json({ success: true, bookmarked: bookmarkedResources });
 };
 exports.getBookmarkedResources = getBookmarkedResources;
+/**
+ *
+ * @param req
+ * @param res
+ * @returns
+ */
+const removeBookMarkedResource = async (req, res) => {
+    const user = req.user;
+    const unBookmark = await mentees.removeBookmarkedResources(user.id, req.params.id);
+    if (unBookmark) {
+        return res.status(200).json({ success: true, message: 'removed' });
+    }
+    ;
+    return res.status(404).json({ success: false, message: 'Could not get resources' });
+};
+exports.removeBookMarkedResource = removeBookMarkedResource;

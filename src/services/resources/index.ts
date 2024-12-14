@@ -2,7 +2,8 @@ import resources from "../../models/schemas/resources";
 import validateResources from "./validate-resources";
 import createHttpError from "http-errors";
 import { Types } from "mongoose";
-import { resourceType } from "../types";
+import { resourceQuery,resourceType } from "../types";
+import filterResources from "../filters/resourceFilter";
 
 /**
  * upload the resources ref to the database
@@ -10,7 +11,7 @@ import { resourceType } from "../types";
  * @returns uploaded resources
  */
 export const createResource = async (data: resourceType) => {
-    if(data.mentorId && !Types.ObjectId.isValid(data.mentorId)){
+    if(data.uploadedBy && !Types.ObjectId.isValid(data.uploadedBy)){
         throw createHttpError.BadRequest('Invalid Mentor id');
     };
     await validateResources(data);
@@ -26,12 +27,14 @@ export const createResource = async (data: resourceType) => {
  * retrive general uploaded resources to the user
  * @returns uploaded resources
  */
-export const getGeneralResources = async (query: any) => {
+export const getGeneralResources = async (query: resourceQuery) => {
     const { page, limit } = query;
+    const queryObject = await filterResources(query)
     let data =  resources.find({
-        uploadedById: { $exists: false },
+        uploadedBy: { $exists: false },
         forwad_with_mentees: { $exists: false },
-        resources_url: { $exists: true, $ne: null}
+        resources_url: { $exists: true, $ne: null},
+        ...queryObject
     });
     data = data.sort('createdAt')
     const pages = Number(page) || 1;
@@ -46,12 +49,15 @@ export const getGeneralResources = async (query: any) => {
  * @param mentorId mentor's id
  * @returns found uploaded data
  */
-export const getUploadedResourcesBymentorId = async (id: string | Types.ObjectId, query:any) => {
+export const getUploadedResourcesBymentorId = async (id: string | Types.ObjectId, query: resourceQuery) => {
     if(!Types.ObjectId.isValid(id)){
         throw new createHttpError.BadRequest('Invalid mentor id');
     };
     const { page, limit } = query;
-    let result = resources.find({ uploadedBy: id }, { forward_to_mentees: 0 });
+    let result = resources.find(
+        { uploadedBy: id }, 
+        { forward_to_mentees: 0 }
+    );
     result = result.sort('createdAt');
     const pages = Number(page) || 1;
     const limits = Number(limit) || 10;
@@ -70,9 +76,10 @@ export const getforwardedResources = async (id: string | Types.ObjectId, query: 
         throw new createHttpError.BadRequest("Invalid mentee id");
     };
     const { page, limit } = query;
+    const queryObject = await filterResources(query);
     let resource = resources.find(
-        { forward_to_mentees: id  },
-        { forward_to_mentees: 0 }
+      { forward_to_mentees: id, ...queryObject },
+      { forward_to_mentees: 0 }
     );
     resource = resource.sort('createdAt');
     const pages = Number(page) || 1;
@@ -89,7 +96,6 @@ export const getforwardedResources = async (id: string | Types.ObjectId, query: 
  * @throws 404 if resources are not found
  */
 export const findResourcesByIds = async (list: string[] | Types.ObjectId[]) => {
-
     const resource = await resources.find(
         { _id: { $in: list } },
         { forward_to_mentees: 0 }
@@ -111,6 +117,6 @@ export const deleteUploadResource = async (id: string | Types.ObjectId, mentorId
     };
     return await resources.findOneAndDelete({ 
         _id: id,
-        mentorId: mentorId
+        uploadedBy: mentorId
     });
 };
