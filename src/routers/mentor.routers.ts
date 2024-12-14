@@ -18,6 +18,14 @@ const router = Router();
  *     description: Allows a mentor to view all pending mentorship requests.
  *     security:
  *       - BearerAuth: []
+ *     parameters:
+ *       - name: page
+ *         in: query
+ *         required: false
+ *         description: Page number for paginated results.
+ *         schema:
+ *           type: string
+ *           example: "1"
  *     responses:
  *       200:
  *         description: Successfully retrieved mentorship requests.
@@ -274,6 +282,9 @@ router.put("/reject/:id", mentor.rejectRequest);
  *               resources_url:
  *                 type: string
  *                 example: "https://example.com/resources/nodejs"
+ *               forward_to_mentees:
+ *                 type: array
+ *                 example: ["mentee123","mentee345894"]
  *             required:
  *               - title
  *               - resources_url

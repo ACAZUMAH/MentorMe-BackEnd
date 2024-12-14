@@ -8,13 +8,14 @@ const resources_1 = __importDefault(require("../../models/schemas/resources"));
 const validate_resources_1 = __importDefault(require("./validate-resources"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const mongoose_1 = require("mongoose");
+const resourceFilter_1 = __importDefault(require("../filters/resourceFilter"));
 /**
  * upload the resources ref to the database
  * @param data mentorId, resources_ref and share_with_mentees
  * @returns uploaded resources
  */
 const createResource = async (data) => {
-    if (data.mentorId && !mongoose_1.Types.ObjectId.isValid(data.mentorId)) {
+    if (data.uploadedBy && !mongoose_1.Types.ObjectId.isValid(data.uploadedBy)) {
         throw http_errors_1.default.BadRequest('Invalid Mentor id');
     }
     ;
@@ -33,10 +34,12 @@ exports.createResource = createResource;
  */
 const getGeneralResources = async (query) => {
     const { page, limit } = query;
+    const queryObject = await (0, resourceFilter_1.default)(query);
     let data = resources_1.default.find({
-        uploadedById: { $exists: false },
+        uploadedBy: { $exists: false },
         forwad_with_mentees: { $exists: false },
-        resources_url: { $exists: true, $ne: null }
+        resources_url: { $exists: true, $ne: null },
+        ...queryObject
     });
     data = data.sort('createdAt');
     const pages = Number(page) || 1;
@@ -77,7 +80,8 @@ const getforwardedResources = async (id, query) => {
     }
     ;
     const { page, limit } = query;
-    let resource = resources_1.default.find({ forward_to_mentees: id }, { forward_to_mentees: 0 });
+    const queryObject = await (0, resourceFilter_1.default)(query);
+    let resource = resources_1.default.find({ forward_to_mentees: id, ...queryObject }, { forward_to_mentees: 0 });
     resource = resource.sort('createdAt');
     const pages = Number(page) || 1;
     const limits = Number(limit) || 5;
@@ -113,7 +117,7 @@ const deleteUploadResource = async (id, mentorId) => {
     ;
     return await resources_1.default.findOneAndDelete({
         _id: id,
-        mentorId: mentorId
+        uploadedBy: mentorId
     });
 };
 exports.deleteUploadResource = deleteUploadResource;

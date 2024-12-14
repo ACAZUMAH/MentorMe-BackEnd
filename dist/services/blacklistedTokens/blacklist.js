@@ -10,7 +10,7 @@ const redis_1 = __importDefault(require("../../models/connect/redis"));
  * @param token token to be blacklisted
  */
 const blacklistToken = async (token) => {
-    await redis_1.default.setEx('blacklisted', 3600 * 2, token);
+    await redis_1.default.setEx('blacklisted', 3600 * 24, token);
 };
 exports.blacklistToken = blacklistToken;
 /**

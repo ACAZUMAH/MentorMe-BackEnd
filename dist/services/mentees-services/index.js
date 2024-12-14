@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findBookmarkedResources = exports.bookmarkResource = exports.deleteMenteeData = exports.addMentor = exports.getMenteeData = void 0;
+exports.removeBookmarkedResources = exports.findBookmarkedResources = exports.bookmarkResource = exports.deleteMenteeData = exports.addMentor = exports.getMenteeData = void 0;
 const mentees_1 = __importDefault(require("../../models/schemas/mentees"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const mongoose_1 = require("mongoose");
@@ -72,9 +72,9 @@ exports.deleteMenteeData = deleteMenteeData;
 const bookmarkResource = async (menteeId, resourceId) => {
     if (!mongoose_1.Types.ObjectId.isValid(menteeId) ||
         !mongoose_1.Types.ObjectId.isValid(resourceId)) {
-        throw new http_errors_1.default.BadRequest("Invalid id");
+        throw new http_errors_1.default.BadRequest("Invalid resource id or mentee id");
     }
-    const bookmark = await mentees_1.default.findOneAndUpdate({ menteeId: menteeId }, { bookmarks: { resourcesIds: [resourceId] } }, { new: true });
+    const bookmark = await mentees_1.default.findOneAndUpdate({ menteeId: menteeId }, { $push: { 'bookmarks.resourcesIds': resourceId } }, { new: true });
     if (!bookmark) {
         throw new http_errors_1.default.BadRequest('Unable to bookmark resource');
     }
@@ -92,7 +92,6 @@ const findBookmarkedResources = async (id) => {
     }
     ;
     const bookmarked = await mentees_1.default.findOne({ menteeId: id });
-    //console.log(bookmarked)
     if (!bookmarked.bookmarks) {
         throw new http_errors_1.default.NotFound('No bookmarked resources found');
     }
@@ -100,3 +99,23 @@ const findBookmarkedResources = async (id) => {
     return bookmarked.bookmarks;
 };
 exports.findBookmarkedResources = findBookmarkedResources;
+/**
+ *
+ * @param menteeId
+ * @param resourceId
+ * @returns
+ */
+const removeBookmarkedResources = async (menteeId, resourceId) => {
+    if (!mongoose_1.Types.ObjectId.isValid(menteeId) ||
+        !mongoose_1.Types.ObjectId.isValid(resourceId)) {
+        throw new http_errors_1.default.BadRequest("Invalid resource id or mentee id");
+    }
+    ;
+    const unBookmark = await mentees_1.default.findOneAndUpdate({ menteeId: menteeId }, { $pull: { 'bookmarks.resourcesIds': resourceId } });
+    if (!unBookmark) {
+        throw new http_errors_1.default.NotFound('No resources found with the provided id');
+    }
+    ;
+    return true;
+};
+exports.removeBookmarkedResources = removeBookmarkedResources;

@@ -100,7 +100,7 @@ exports.rejectRequest = rejectRequest;
  */
 const uploadResources = async (req, res) => {
     const user = req.user;
-    const upload = await resources.createResource({ mentorId: user.id, ...req.body });
+    const upload = await resources.createResource({ uploadedBy: user.id, ...req.body });
     return res.status(201).json({ success: true, data: upload });
 };
 exports.uploadResources = uploadResources;
@@ -113,7 +113,7 @@ exports.uploadResources = uploadResources;
 const getMentorUploadedResources = async (req, res) => {
     const user = req.user;
     const data = await resources.getUploadedResourcesBymentorId(user.id, { ...req.query });
-    if (!data) {
+    if (data.length === 0) {
         throw new http_errors_1.default.NotFound('You have no uploaded resources yet');
     }
     ;

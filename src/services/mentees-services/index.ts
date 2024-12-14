@@ -74,11 +74,11 @@ export const bookmarkResource = async (
     !Types.ObjectId.isValid(menteeId) ||
     !Types.ObjectId.isValid(resourceId)
   ) {
-    throw new createHttpError.BadRequest("Invalid id");
+    throw new createHttpError.BadRequest("Invalid resource id or mentee id");
   }
   const bookmark = await mentee.findOneAndUpdate(
     { menteeId: menteeId },
-    { bookmarks: { resourcesIds: [resourceId] } },
+    { $push: { 'bookmarks.resourcesIds': resourceId } } ,
     { new: true }
   );
   if (!bookmark) {
@@ -97,9 +97,35 @@ export const findBookmarkedResources = async (id: string | Types.ObjectId) => {
         throw new createHttpError.BadRequest('Invalid mentee id');
     };
     const bookmarked: any = await mentee.findOne({ menteeId: id });
-    //console.log(bookmarked)
     if(!bookmarked.bookmarks){
         throw new createHttpError.NotFound('No bookmarked resources found');
     };
     return bookmarked.bookmarks;
 };
+
+/**
+ * 
+ * @param menteeId 
+ * @param resourceId 
+ * @returns 
+ */
+export const removeBookmarkedResources = async (  
+    menteeId: string | Types.ObjectId,
+    resourceId: string | Types.ObjectId
+) => {
+    if (
+        !Types.ObjectId.isValid(menteeId) ||
+        !Types.ObjectId.isValid(resourceId)
+    ) {
+        throw new createHttpError.BadRequest("Invalid resource id or mentee id");
+    };
+
+    const unBookmark = await mentee.findOneAndUpdate(
+        { menteeId: menteeId },
+        { $pull: { 'bookmarks.resourcesIds': resourceId } }
+    );
+    if(!unBookmark){
+        throw new createHttpError.NotFound('No resources found with the provided id')
+    };
+    return true;
+}

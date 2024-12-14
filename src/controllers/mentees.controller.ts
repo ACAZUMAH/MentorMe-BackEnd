@@ -53,27 +53,35 @@ export const cancelMentorshipRequest = async (req: Request, res: Response) => {
 
 
 /**
- * controller for getting uploaded resources
+ * controller for getting uploaded resources by MentorMe
  * @param req Request object
  * @param res Response object
  * @returns uploded resources
  * @throws 404 if no resources found
  */
-export const getUploadedResources = async (req: Request, res: Response) => {
+export const getMentorMeResources = async (req: Request, res: Response) => {
     const user: any = req.user;
-    const resources: any = []
-    const data = await resource.getGeneralResources({ ...req.query })
-    const forwaded = await resource.getforwardedResources(user.id, { ...req.query }) 
-    if(data.length === 0 && forwaded.length === 0){
+    const data = await resource.getGeneralResources({ ...req.query }) 
+    if(data.length === 0){
         throw new createHttpError.NotFound("No uploaded resources found");
     };
-    if(data.length !== 0){
-        resources.push(data);
-    };
-    if(forwaded.length !== 0){
-        resources.push(forwaded);
-    };
-    return res.status(200).json({ success: true, data: resources });
+    return res.status(200).json({ success: true, data: data });
+};
+
+/**
+ * controller for getting resources shared by mentor
+ * @param req Request object
+ * @param res Response object
+ * @returns mentor uploaded resources
+ * @throws 404 if no resources found
+ */
+export const getUploadedResources = async (req: Request, res: Response) => {
+  const user: any = req.user;
+  const forwarded = await resource.getforwardedResources(user.id, { ...req.query })
+  if(forwarded.length === 0){
+    throw new createHttpError.NotFound("No uploaded resources found");
+  };
+  return res.status(200).json({ success: true, data: forwarded})
 };
 
 /**
@@ -107,4 +115,19 @@ export const getBookmarkedResources = async (req: Request, res: Response) => {
     return res
       .status(200)
       .json({ success: true, bookmarked: bookmarkedResources }); 
+};
+
+/**
+ * 
+ * @param req 
+ * @param res 
+ * @returns 
+ */
+export const removeBookMarkedResource = async (req: Request, res: Response) => {
+    const user: any = req.user;
+    const unBookmark = await mentees.removeBookmarkedResources(user.id, req.params.id);
+    if(unBookmark){
+        return res.status(200).json({ success: true, message: 'removed'});
+    };
+    return res.status(404).json({ success: false, message: 'Could not get resources'});
 };

@@ -261,7 +261,7 @@ router.delete("/request/:id", mentee.cancelMentorshipRequest);
  * @swagger
  * /mentee/resources:
  *   get:
- *     summary: Get Uploaded Resources
+ *     summary: Get Uploaded Resources shared to mentee by Mentor
  *     description: Allows mentees to retrieve general and forwarded uploaded resources.
  *     tags:
  *       - Mentee Management
@@ -282,6 +282,13 @@ router.delete("/request/:id", mentee.cancelMentorshipRequest);
  *         schema:
  *           type: string
  *           example: "10"
+ *       - in: query
+ *         name: title
+ *         required: false
+ *         description: title of the resources to search for .
+ *         schema:
+ *           type: string
+ *           example: "introduction to python"
  *     responses:
  *       200:
  *         description: Successfully retrieved uploaded resources.
@@ -351,6 +358,8 @@ router.delete("/request/:id", mentee.cancelMentorshipRequest);
  *                   example: "Internal Server Error"
  */
 router.get('/resources', mentee.getUploadedResources);
+
+router.get('/MentorMe/resources', mentee.getMentorMeResources);
 
 /**
  * @swagger
@@ -505,5 +514,7 @@ router.put('/bookmark/:id', mentee.bookmarkResources);
  *                   example: "Internal Server Error"
  */
 router.get('/bookmarks', mentee.getBookmarkedResources);
+
+router.patch("/bookmark/:id", mentee.removeBookMarkedResource);
 
 export default router;
