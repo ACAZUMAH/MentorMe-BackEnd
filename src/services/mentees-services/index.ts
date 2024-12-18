@@ -35,14 +35,9 @@ export const addMentor = async (ids: idType) => {
     };
     const menteeData = await mentee.findOneAndUpdate(
         { menteeId: ids.menteeId },
-        { $push: { mentors: ids.mentorId } },
-        { new: true }
+        { $addToSet: { mentors: ids.mentorId } },
+        { new: true, upsert: true }
     );
-    if(!menteeData){
-        await mentee.create(
-            { menteeId: ids.menteeId, mentors: [ids.mentorId] }
-        );
-    };
     return true;
 };
 

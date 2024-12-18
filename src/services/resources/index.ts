@@ -3,7 +3,7 @@ import validateResources from "./validate-resources";
 import createHttpError from "http-errors";
 import { Types } from "mongoose";
 import { resourceQuery,resourceType } from "../types";
-import filterResources from "../filters/resourceFilter";
+import { filterResources } from "../../helpers/index";
 
 /**
  * upload the resources ref to the database
@@ -49,7 +49,7 @@ export const getGeneralResources = async (query: resourceQuery) => {
  * @param mentorId mentor's id
  * @returns found uploaded data
  */
-export const getUploadedResourcesBymentorId = async (id: string | Types.ObjectId, query: resourceQuery) => {
+export const getResourcesBymentorId = async (id: string|Types.ObjectId, query: resourceQuery) => {
     if(!Types.ObjectId.isValid(id)){
         throw new createHttpError.BadRequest('Invalid mentor id');
     };
@@ -71,7 +71,7 @@ export const getUploadedResourcesBymentorId = async (id: string | Types.ObjectId
  * @param menteeId mentee's id
  * @returns found uploaded data
  */
-export const getforwardedResources = async (id: string | Types.ObjectId, query: any) => {
+export const getforwardedResources = async (id: string|Types.ObjectId, query: any) => {
     if(!Types.ObjectId.isValid(id)){
         throw new createHttpError.BadRequest("Invalid mentee id");
     };
@@ -95,7 +95,7 @@ export const getforwardedResources = async (id: string | Types.ObjectId, query: 
  * @returns found list of resources
  * @throws 404 if resources are not found
  */
-export const findResourcesByIds = async (list: string[] | Types.ObjectId[]) => {
+export const findResourcesByIds = async (list: string[]|Types.ObjectId[]) => {
     const resource = await resources.find(
         { _id: { $in: list } },
         { forward_to_mentees: 0 }
@@ -111,7 +111,7 @@ export const findResourcesByIds = async (list: string[] | Types.ObjectId[]) => {
  * @param id 
  * @returns 
  */
-export const deleteUploadResource = async (id: string | Types.ObjectId, mentorId: string) => {
+export const deleteUploadResource = async (id: string|Types.ObjectId, mentorId: string) => {
     if (!Types.ObjectId.isValid(id)) {
         throw new createHttpError.BadRequest("Invalid mentor id");
     };

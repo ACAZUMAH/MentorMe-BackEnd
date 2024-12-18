@@ -5,7 +5,7 @@ import { userType } from "../types";
 import { validateAuthData, validateProfileData } from "./validateUserData";
 import { createAuth } from "../auth-services";
 import { hashPassword } from "../../helpers";
-import filterQuery from "../filters/filter";
+import { filterQuery } from "../../helpers/index";
 import { queryType } from "../types";
 import * as mentorship from "../mentoship-services/mentorship";
 import * as Mentor from "../mentors-services/index";
@@ -141,7 +141,7 @@ export const findUserByIdAndUpdate = async (
   );
   if (!user) {
     throw new createHttpError.NotFound("No user found with this id");
-  }
+  };
   return true;
 };
 
@@ -159,15 +159,15 @@ export const findUserByIdAndDelete = async (id: string | Types.ObjectId) => {
   const user = await User.findByIdAndDelete({ _id: id });
   if (!user) {
     throw new createHttpError.NotFound("No user found with this id");
-  }
+  };
   if (user.role === "Mentor") {
     await Mentor.deleteMentorData(id);
     await mentorship.deleteAllRequest(id);
-  }
+  };
   if (user.role === "Mentee") {
     await Mentee.deleteMenteeData(id);
     await mentorship.deleteAllRequest(id);
-  }
+  };
   return user;
 };
 
@@ -246,4 +246,21 @@ export const getMyMentees = async (id: string | Types.ObjectId,query: queryType)
     const skip = (pages - 1) * limits;
     result = result.skip(skip).limit(limits);
     return await result;
+};
+
+/**
+ * combine the mentor and the mentee ids together
+ * @param sender sender id
+ * @param receiver receiver id
+ * @returns return combined ids
+ */
+export const combineIds = async (sender: string, receiver: string) => {
+  const user = await findUserById(sender);
+  let combined: any
+  if(user?.role === 'Mentor'){
+    combined = `${sender}${receiver}`
+  }else{
+    combined = `${receiver}${sender}`
+  }
+  return combined;
 };

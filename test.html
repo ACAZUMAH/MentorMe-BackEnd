@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Chat App with JWT</title>
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Chat App</h1>
+    <input id="receiverId" placeholder="Receiver ID" />
+    <input id="message" placeholder="Enter message" />
+    <button onclick="sendMessage()">Send</button>
+
+    <h2>Messages:</h2>
+    <ul id="messages"></ul>
+
+    <script>
+        const token = prompt('Enter your JWT token:'); // User enters their token
+
+        // Connect to the server with JWT token
+        const socket = io('http://localhost:3500', {
+            auth: {
+                token: token
+            }
+        });
+
+        socket.on('connect', () => {
+            console.log('Connected to server with JWT');
+            const senderId = prompt("Enter sender's id to receive undelivered messages:")
+            socket.emit('join', { senderId }); // Emit the join event
+        });
+
+        socket.on('receiveMessage', (data) => {
+            const messageList = document.getElementById('messages');
+            const listItem = document.createElement('li');
+            listItem.textContent = `${data.senderId}: ${data.message}`;
+            messageList.appendChild(listItem);
+        });
+
+        function sendMessage() {
+            const receiverId = document.getElementById('receiverId').value;
+            const message = document.getElementById('message').value;
+
+            socket.emit('sendMessage', {
+                receiverId,
+                message
+            });
+        }
+    </script>
+</body>
+</html>
