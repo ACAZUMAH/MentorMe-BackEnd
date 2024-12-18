@@ -112,7 +112,7 @@ exports.uploadResources = uploadResources;
  */
 const getMentorUploadedResources = async (req, res) => {
     const user = req.user;
-    const data = await resources.getUploadedResourcesBymentorId(user.id, { ...req.query });
+    const data = await resources.getResourcesBymentorId(user.id, { ...req.query });
     if (data.length === 0) {
         throw new http_errors_1.default.NotFound('You have no uploaded resources yet');
     }

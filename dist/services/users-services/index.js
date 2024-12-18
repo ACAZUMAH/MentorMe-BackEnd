@@ -36,14 +36,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMyMentees = exports.getMyMentors = exports.findAllMentorsOrMentees = exports.findUserByIdAndDelete = exports.findUserByIdAndUpdate = exports.finduserByIdAndUpdateIsAuth = exports.getUserByPhone = exports.findUserByEmail = exports.findUserById = exports.checkUserExists = exports.createGoogleUser = exports.createUser = void 0;
+exports.combineIds = exports.getMyMentees = exports.getMyMentors = exports.findAllMentorsOrMentees = exports.findUserByIdAndDelete = exports.findUserByIdAndUpdate = exports.finduserByIdAndUpdateIsAuth = exports.getUserByPhone = exports.findUserByEmail = exports.findUserById = exports.checkUserExists = exports.createGoogleUser = exports.createUser = void 0;
 const usersSchema_1 = __importDefault(require("../../models/schemas/usersSchema"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const mongoose_1 = require("mongoose");
 const validateUserData_1 = require("./validateUserData");
 const auth_services_1 = require("../auth-services");
 const helpers_1 = require("../../helpers");
-const filter_1 = __importDefault(require("../filters/filter"));
+const index_1 = require("../../helpers/index");
 const mentorship = __importStar(require("../mentoship-services/mentorship"));
 const Mentor = __importStar(require("../mentors-services/index"));
 const Mentee = __importStar(require("../mentees-services/index"));
@@ -165,6 +165,7 @@ const findUserByIdAndUpdate = async (id, data) => {
     if (!user) {
         throw new http_errors_1.default.NotFound("No user found with this id");
     }
+    ;
     return true;
 };
 exports.findUserByIdAndUpdate = findUserByIdAndUpdate;
@@ -183,14 +184,17 @@ const findUserByIdAndDelete = async (id) => {
     if (!user) {
         throw new http_errors_1.default.NotFound("No user found with this id");
     }
+    ;
     if (user.role === "Mentor") {
         await Mentor.deleteMentorData(id);
         await mentorship.deleteAllRequest(id);
     }
+    ;
     if (user.role === "Mentee") {
         await Mentee.deleteMenteeData(id);
         await mentorship.deleteAllRequest(id);
     }
+    ;
     return user;
 };
 exports.findUserByIdAndDelete = findUserByIdAndDelete;
@@ -202,7 +206,7 @@ exports.findUserByIdAndDelete = findUserByIdAndDelete;
  */
 const findAllMentorsOrMentees = async (query) => {
     const { page, limit } = query;
-    const queryObject = await (0, filter_1.default)(query);
+    const queryObject = await (0, index_1.filterQuery)(query);
     let result = usersSchema_1.default.find(queryObject, { password: 0, __v: 0 });
     if (query.sort) {
         const sortArray = query.sort.split(",").join(" ");
@@ -230,7 +234,7 @@ const getMyMentors = async (id, query) => {
         throw new http_errors_1.default.BadRequest("Invalid user id");
     }
     ;
-    const queryObject = await (0, filter_1.default)(query);
+    const queryObject = await (0, index_1.filterQuery)(query);
     const data = await Mentee.getMenteeData(id);
     if (!data?.mentors) {
         throw new http_errors_1.default.NotFound("You don't have mentors yet");
@@ -256,7 +260,7 @@ const getMyMentees = async (id, query) => {
         throw new http_errors_1.default.BadRequest("Invalid user id");
     }
     ;
-    const queryObject = await (0, filter_1.default)(query);
+    const queryObject = await (0, index_1.filterQuery)(query);
     const data = await Mentor.getMentorData(id);
     if (!data?.mentees) {
         throw new http_errors_1.default.NotFound("You don't have mentees yet");
@@ -270,3 +274,21 @@ const getMyMentees = async (id, query) => {
     return await result;
 };
 exports.getMyMentees = getMyMentees;
+/**
+ * combine the mentor and the mentee ids together
+ * @param sender sender id
+ * @param receiver receiver id
+ * @returns return combined ids
+ */
+const combineIds = async (sender, receiver) => {
+    const user = await (0, exports.findUserById)(sender);
+    let combined;
+    if (user?.role === 'Mentor') {
+        combined = `${sender}${receiver}`;
+    }
+    else {
+        combined = `${receiver}${sender}`;
+    }
+    return combined;
+};
+exports.combineIds = combineIds;
