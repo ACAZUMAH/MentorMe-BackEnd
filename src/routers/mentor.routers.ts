@@ -534,5 +534,4 @@ router.get('/resources', mentor.getMentorUploadedResources);
  */
 router.delete('/resources/:id', mentor.deleteResources);
 
-
 export default router;

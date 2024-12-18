@@ -1,4 +1,5 @@
 import Ajv from 'ajv';
+import { messageType } from '../types';
 import createHttpError from 'http-errors';
 
 /**
@@ -6,21 +7,20 @@ import createHttpError from 'http-errors';
  * @param data 
  * @returns 
  */
-const validateResources = async (data: any) => {
+const validateMessageData = async (data: messageType) => {
     const ajv = new Ajv();
 
     const schema = {
         type: 'object',
         properties: {
-            mentorId: { type: 'string' },
-            title: { type: 'string' },
-            resources_url: { type: 'string' },
-            forward_to_mentees: { type: 'array', items: { type: 'string' } }
+            messagesIds: { type: 'string' },
+            senderId: { type: 'string' },
+            message: { type: 'string', maxLength: 250}
         },
-        required: ['resources_url']
+        required: ['messagesIds', 'senderId', 'message']
     };
 
-    const validate = ajv.compile(schema);
+    const validate  = ajv.compile(schema);
 
     const isValid = validate(data);
 
@@ -29,8 +29,8 @@ const validateResources = async (data: any) => {
             return { key: error.instancePath, message: error.message };
         });
         throw new createHttpError.BadRequest(JSON.stringify(errors));
-    }; 
+    };
     return true;
 };
 
-export default validateResources;
+export default validateMessageData;

@@ -12,9 +12,9 @@ import sendSms from './send-Sms';
  * @returns boolean true
  */
 export const generateOtpAndSendSms = async (id: string | Types.ObjectId, phone: string) => {
-    let otp = await generateOTP(6);
+    let otp = await generateOTP(5);
     while(await findAuthByCode(otp)){
-        otp = await generateOTP(6);
+        otp = await generateOTP(5);
     };
     const ExpiresIn = new Date(Date.now() + 1 * 60 * 1000);
     await findAuthAndUpdate(id, { code: otp, expiresIn: ExpiresIn });

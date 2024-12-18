@@ -3,9 +3,8 @@ import jsonwebtoken from "jsonwebtoken";
 import { Types } from "mongoose";
 import { Request, Response, NextFunction } from "express";
 import { isTokenBlacklisted } from "../services/blacklistedTokens/blacklist";
-
-
-export const blacklistedTokens = new Set<string>();
+import { queryType, resourceQuery } from "../services/types";
+import createHttpError from "http-errors";
 
 /**
  *
@@ -16,6 +15,7 @@ export const hashPassword = async (password: string) => {
   const salt = await bcrypt.genSalt(10);
   return await bcrypt.hash(password, salt);
 };
+
 /**
  * 
  * @param password 
@@ -46,22 +46,47 @@ export const generateAccessToken = async (id: Types.ObjectId | string) => {
  * @param next 
  * @returns 
  */
-export const verifyAccessToken = async (req: Request, res: Response, next: NextFunction) => {
+export const verifyAccessToken = async (req: Request, _res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
   const token = authHeader && authHeader.split(' ')[1];
   if(!token) {
-    return res.status(401).json({ message: "Unauthorized" });
+    throw new createHttpError.Forbidden("Forbidden");
   };
   if(await isTokenBlacklisted(token)) {
-    return res.status(403).json({ message: "Forbidden" });
+    throw new createHttpError.Unauthorized('Unauthorized');
   };
-  jsonwebtoken.verify(token, process.env.ACCESS_TOKEN_SECRET as string, (err, user) => {
+  jsonwebtoken.verify(
+    token, process.env.ACCESS_TOKEN_SECRET as string, (err, user) => {
     if(err) {
-      return res.status(403).json({ message: "Forbidden" });
+      throw new createHttpError.Unauthorized("Unauthorized");
     }
     req.user = user;
     next();
   });
+};
+
+/**
+ * 
+ * @param socket 
+ * @param next 
+ */
+export const verifySocketToken = async (socket: any, next: NextFunction) => {
+  const token = socket.handshake.auth?.token; 
+  if(!token){
+    throw new createHttpError.Forbidden('Forbidden');
+  };
+  jsonwebtoken.verify(
+    token, 
+    process.env.ACCESS_TOKEN_SECRET as string, 
+    (err:any, user:any) =>{
+
+      if(err){
+        throw new createHttpError.Unauthorized('Unauthorized');
+      };
+      socket.user = user;
+      next();
+    }
+  );
 };
 
 /**
@@ -79,3 +104,37 @@ export const generateOTP = async (len: number) => {
   return otp;
 };
 
+
+/**
+ * filter users by role, fullName, programmeOfStudy, level and sort them
+ * @param query query object
+ * @returns filtered users
+ */
+export const filterQuery = async (query: queryType) => {
+  const { role, fullName, programmeOfStudy, level } = query;
+  const queryObject: Partial<queryType> = {};
+  if (role) queryObject.role = role;
+
+  if (fullName) queryObject.fullName = { $regex: fullName, $options: "i" };
+
+  if (programmeOfStudy)
+    queryObject.programmeOfStudy = { $regex: programmeOfStudy, $options: "i" };
+
+  if (level) queryObject.level = level;
+
+  return queryObject;
+};
+
+/**
+ * 
+ * @param query 
+ * @returns 
+ */
+export const filterResources = async (query: resourceQuery) => {
+  const { title } = query;
+  const queryObject: resourceQuery = {};
+  if (title) {
+    queryObject.title = { $regex: title, $options: "i" };
+  }
+  return queryObject;
+};

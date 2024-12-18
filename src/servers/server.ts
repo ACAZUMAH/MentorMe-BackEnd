@@ -3,8 +3,8 @@ import createExpressApp from "./createExpressApp";
 import connectDB from "../models/connect";
 import client from "../models/connect/redis";
 import createsocketServer from "./createSocketServer";
+import Messaging from "../sockets";
 
-let io: any;
 /**
  * create the http server here and start the server
  */
@@ -13,11 +13,11 @@ export const startServer = async () => {
     await client.connect();
     const app = await createExpressApp();
     const server = http.createServer(app);
-    io = await createsocketServer(server);
+    const io = await createsocketServer(server);
+    await Messaging(io)
     server.listen(process.env.PORT, () => {
         console.log(`Server is running on port ${process.env.PORT}`);
     });
 };
 
 export default startServer;
-export { io };

@@ -1,4 +1,5 @@
 import { Server } from 'socket.io';
+import { verifySocketToken } from '../helpers';
 
 
 /**
@@ -13,16 +14,7 @@ export const createsocketServer = async (server: any) => {
             methods: ["GET", "POST"]
         }
     });
-
-    io.on('connection', (socket) => {
-        socket.on('join' , (room) => {
-            socket.join(room);
-        });
-
-        socket.on('disconnect', () => {
-        });
-    })
-
+    io.use(verifySocketToken);
     return io;
 };
 
