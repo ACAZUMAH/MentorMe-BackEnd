@@ -3,12 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUploadResource = exports.findResourcesByIds = exports.getforwardedResources = exports.getUploadedResourcesBymentorId = exports.getGeneralResources = exports.createResource = void 0;
+exports.deleteUploadResource = exports.findResourcesByIds = exports.getforwardedResources = exports.getResourcesBymentorId = exports.getGeneralResources = exports.createResource = void 0;
 const resources_1 = __importDefault(require("../../models/schemas/resources"));
 const validate_resources_1 = __importDefault(require("./validate-resources"));
 const http_errors_1 = __importDefault(require("http-errors"));
 const mongoose_1 = require("mongoose");
-const resourceFilter_1 = __importDefault(require("../filters/resourceFilter"));
+const index_1 = require("../../helpers/index");
 /**
  * upload the resources ref to the database
  * @param data mentorId, resources_ref and share_with_mentees
@@ -34,7 +34,7 @@ exports.createResource = createResource;
  */
 const getGeneralResources = async (query) => {
     const { page, limit } = query;
-    const queryObject = await (0, resourceFilter_1.default)(query);
+    const queryObject = await (0, index_1.filterResources)(query);
     let data = resources_1.default.find({
         uploadedBy: { $exists: false },
         forwad_with_mentees: { $exists: false },
@@ -54,7 +54,7 @@ exports.getGeneralResources = getGeneralResources;
  * @param mentorId mentor's id
  * @returns found uploaded data
  */
-const getUploadedResourcesBymentorId = async (id, query) => {
+const getResourcesBymentorId = async (id, query) => {
     if (!mongoose_1.Types.ObjectId.isValid(id)) {
         throw new http_errors_1.default.BadRequest('Invalid mentor id');
     }
@@ -68,7 +68,7 @@ const getUploadedResourcesBymentorId = async (id, query) => {
     result = result.skip(skip).limit(limits);
     return await result;
 };
-exports.getUploadedResourcesBymentorId = getUploadedResourcesBymentorId;
+exports.getResourcesBymentorId = getResourcesBymentorId;
 /**
  * retrieve forwarded uploaded resources by mentee id
  * @param menteeId mentee's id
@@ -80,7 +80,7 @@ const getforwardedResources = async (id, query) => {
     }
     ;
     const { page, limit } = query;
-    const queryObject = await (0, resourceFilter_1.default)(query);
+    const queryObject = await (0, index_1.filterResources)(query);
     let resource = resources_1.default.find({ forward_to_mentees: id, ...queryObject }, { forward_to_mentees: 0 });
     resource = resource.sort('createdAt');
     const pages = Number(page) || 1;

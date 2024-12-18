@@ -15,9 +15,9 @@ const helpers_1 = require("../../helpers");
  * @returns boolean true
  */
 const generateOtpAndSendSms = async (id, phone) => {
-    let otp = await (0, helpers_1.generateOTP)(6);
+    let otp = await (0, helpers_1.generateOTP)(5);
     while (await (0, index_1.findAuthByCode)(otp)) {
-        otp = await (0, helpers_1.generateOTP)(6);
+        otp = await (0, helpers_1.generateOTP)(5);
     }
     ;
     const ExpiresIn = new Date(Date.now() + 1 * 60 * 1000);

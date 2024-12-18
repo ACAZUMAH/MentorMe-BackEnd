@@ -38,11 +38,7 @@ const addMentee = async (ids) => {
         throw new http_errors_1.default.BadRequest('Invalid mentor or mentee id');
     }
     ;
-    const mentorData = await mentors_1.default.findOneAndUpdate({ mentorId: ids.mentorId }, { $push: { mentees: ids.menteeId } }, { new: true });
-    if (!mentorData) {
-        await mentors_1.default.create({ mentorId: ids.mentorId, mentees: [ids.menteeId] });
-    }
-    ;
+    const mentorData = await mentors_1.default.findOneAndUpdate({ mentorId: ids.mentorId }, { $addToSet: { mentees: ids.menteeId } }, { new: true, upsert: true });
     return true;
 };
 exports.addMentee = addMentee;

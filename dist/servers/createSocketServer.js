@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createsocketServer = void 0;
 const socket_io_1 = require("socket.io");
+const helpers_1 = require("../helpers");
 /**
  *
  * @param server
@@ -14,13 +15,7 @@ const createsocketServer = async (server) => {
             methods: ["GET", "POST"]
         }
     });
-    io.on('connection', (socket) => {
-        socket.on('join', (room) => {
-            socket.join(room);
-        });
-        socket.on('disconnect', () => {
-        });
-    });
+    io.use(helpers_1.verifySocketToken);
     return io;
 };
 exports.createsocketServer = createsocketServer;

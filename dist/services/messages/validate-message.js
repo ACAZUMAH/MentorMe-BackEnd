@@ -10,17 +10,16 @@ const http_errors_1 = __importDefault(require("http-errors"));
  * @param data
  * @returns
  */
-const validateResources = async (data) => {
+const validateMessageData = async (data) => {
     const ajv = new ajv_1.default();
     const schema = {
         type: 'object',
         properties: {
-            mentorId: { type: 'string' },
-            title: { type: 'string' },
-            resources_url: { type: 'string' },
-            forward_to_mentees: { type: 'array', items: { type: 'string' } }
+            messagesIds: { type: 'string' },
+            senderId: { type: 'string' },
+            message: { type: 'string', maxLength: 250 }
         },
-        required: ['resources_url']
+        required: ['messagesIds', 'senderId', 'message']
     };
     const validate = ajv.compile(schema);
     const isValid = validate(data);
@@ -33,4 +32,4 @@ const validateResources = async (data) => {
     ;
     return true;
 };
-exports.default = validateResources;
+exports.default = validateMessageData;
