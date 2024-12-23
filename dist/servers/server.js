@@ -20,7 +20,7 @@ const startServer = async () => {
     const server = http_1.default.createServer(app);
     const io = await (0, createSocketServer_1.default)(server);
     await (0, sockets_1.default)(io);
-    server.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT || 3500, () => {
         console.log(`Server is running on port ${process.env.PORT}`);
     });
 };
