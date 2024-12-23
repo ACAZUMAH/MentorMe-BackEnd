@@ -16,7 +16,7 @@ const options = {
     },
     servers: [
       {
-        url: ["https://mentorme-le82.onrender.com"],
+        url: "https://mentorme-le82.onrender.com",
       },
     ],
   },
@@ -29,7 +29,7 @@ const setUpSwagger = async (app: Application) => {
   app.use(
     "/api-docs",
     swaggerUi.serve,
-    swaggerUi.setup(swaggerSpec, )
+    swaggerUi.setup(swaggerSpec)
   );
 };
 

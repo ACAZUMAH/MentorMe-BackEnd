@@ -19,7 +19,7 @@ const options = {
         },
         servers: [
             {
-                url: ["https://mentorme-le82.onrender.com"],
+                url: "https://mentorme-le82.onrender.com",
             },
         ],
     },
