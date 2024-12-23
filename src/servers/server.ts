@@ -15,7 +15,7 @@ export const startServer = async () => {
     const server = http.createServer(app);
     const io = await createsocketServer(server);
     await Messaging(io)
-    server.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT || 3500, () => {
         console.log(`Server is running on port ${process.env.PORT}`);
     });
 };
