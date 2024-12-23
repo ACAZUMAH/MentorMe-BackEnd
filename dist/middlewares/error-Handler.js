@@ -12,7 +12,6 @@ const http_errors_1 = __importDefault(require("http-errors"));
  * @param next next function
  */
 const errorHandler = (err, req, res, next) => {
-    console.log(err);
     if (err instanceof http_errors_1.default.HttpError) {
         return res.status(err.statusCode).json({ errors: [{ message: err.message }] });
     }
