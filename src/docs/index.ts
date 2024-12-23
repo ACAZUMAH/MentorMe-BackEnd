@@ -20,7 +20,7 @@ const options = {
       },
     ],
   },
-  apis: ["dist/routers/*.js"],
+  apis: ["dist/docs/*.js"],
 };
 
 const CSS_URL =
