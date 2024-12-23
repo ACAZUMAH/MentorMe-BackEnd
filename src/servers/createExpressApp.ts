@@ -26,7 +26,7 @@ const createExpressApp = async (): Promise<Application> => {
         store: new redisStore({ client: client }),
         secret: process.env.SESSION_SECRET as string,
         resave: false,
-        saveUninitialized: false
+        saveUninitialized: false 
     }));
     app.use(passport.initialize());
     app.use(passport.session()); 
