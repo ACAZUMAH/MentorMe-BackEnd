@@ -57,7 +57,7 @@ const sendPending = async (socket: any, io: any) => {
       messagesIds,
     );
     const receiverSocket = await messages.findReceiverSocketId(socket.user.id);
-    if (pendingMessages) {
+    if (pendingMessages.messages) {
       for(const message of pendingMessages.messages){
         if(message.senderId !== socket.user.id){
           io.to(receiverSocket?.socketId).emit("receiveMessage", message);

@@ -19,11 +19,11 @@ const options = {
         },
         servers: [
             {
-                url: "http://localhost:3500",
+                url: ["https://mentorme-le82.onrender.com"],
             },
         ],
     },
-    apis: ["dist/routers/*.js"],
+    apis: ["dist/docs/*.js"],
 };
 const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
 const swaggerSpec = (0, swagger_jsdoc_1.default)(options);

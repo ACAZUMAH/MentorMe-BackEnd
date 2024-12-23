@@ -16,11 +16,11 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:3500",
+        url: ["https://mentorme-le82.onrender.com"],
       },
     ],
   },
-  apis: ["dist/routers/*.js"],
+  apis: ["dist/docs/*.js"],
 };
 
 const CSS_URL =

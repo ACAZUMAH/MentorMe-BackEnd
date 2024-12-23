@@ -8,5 +8,5 @@ const messagesSchema = new mongoose_1.default.Schema({
     senderId: { type: String, required: true },
     message: { type: String, required: true },
     delivered: { type: Boolean, default: false }
-});
+}, { timestamps: true });
 exports.default = messagesSchema;
