@@ -38,6 +38,9 @@ const createExpressApp = async () => {
     app.use((0, cors_1.default)());
     app.use((0, helmet_1.default)());
     app.use((0, xss_clean_1.default)());
+    app.get("/", (_req, res) => {
+        res.status(200).send("<a href='/api-docs'>docs</a>");
+    });
     app.use(routers_1.default);
     await (0, docs_1.default)(app);
     app.use(error_Handler_1.default);

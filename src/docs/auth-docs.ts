@@ -1,36 +1,3 @@
-/**
- * @swagger
- * tags:
- *   - name: Authentication
- *     description: Routes for user authentication
- */
-
-/**
- * @swagger
- * /auth/google:
- *   get:
- *     summary: continuing with Google 
- *     description: Initiates the Google OAuth2 login process. The user is redirected to Google's login page.
- *     tags: [Authentication]
- *     responses:
- *       302:
- *         description: Redirects to Google's OAuth login page.
- *       500:
- *         description: Internal server error.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   description: Whether the request was successful.
- *                   example: false
- *                 message:
- *                   type: string
- *                   description: A failure message indicating an internal error.
- *                   example: "Internal server error"
- */
 
 /**
  * @swagger

@@ -19,11 +19,11 @@ const options = {
         },
         servers: [
             {
-                url: "https://mentorme-le82.onrender.com",
+                url: "https://mentor-me-one.vercel.app/",
             },
         ],
     },
-    apis: ["dist/docs/*.js"],
+    apis: ["dist/routers/*.js"],
 };
 const swaggerSpec = (0, swagger_jsdoc_1.default)(options);
 const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";

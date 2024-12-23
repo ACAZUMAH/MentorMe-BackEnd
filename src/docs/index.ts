@@ -16,11 +16,11 @@ const options = {
     },
     servers: [
       {
-        url: "https://mentorme-le82.onrender.com",
+        url: "https://mentor-me-one.vercel.app/",
       },
     ],
   },
-  apis: ["dist/docs/*.js"],
+  apis: ["dist/routers/*.js"],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
