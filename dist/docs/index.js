@@ -25,12 +25,15 @@ const options = {
     },
     apis: ["dist/docs/*.js"],
 };
-const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
 const swaggerSpec = (0, swagger_jsdoc_1.default)(options);
 const setUpSwagger = async (app) => {
-    app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerSpec, {
-        customCss: ".swagger-ui .opblock .opblock-summary-path-description-wrapper { align-items: center; display: flex; flex-wrap: wrap; gap: 0 10px; padding: 0 10px; width: 100%; }",
-        customCssUrl: CSS_URL,
-    }));
+    app.use("/api-docs", swagger_ui_express_1.default.serve, swagger_ui_express_1.default.setup(swaggerSpec));
 };
 exports.default = setUpSwagger;
+// const CSS_URL =
+//   "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
+// {
+//   customCss:
+//     ".swagger-ui .opblock .opblock-summary-path-description-wrapper { align-items: center; display: flex; flex-wrap: wrap; gap: 0 10px; padding: 0 10px; width: 100%; }",
+//   customCssUrl: CSS_URL,
+// }
