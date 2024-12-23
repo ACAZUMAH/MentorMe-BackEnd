@@ -34,6 +34,9 @@ const createExpressApp = async (): Promise<Application> => {
     app.use(cors());
     app.use(helmet());
     app.use(xss());
+    app.get("/", (req, res) => {
+      res.status(200).send("<a href='/api-docs'>docs</a>");
+    });
     app.use(route);
     await setUpSwagger(app);
     app.use(errorHandler);
