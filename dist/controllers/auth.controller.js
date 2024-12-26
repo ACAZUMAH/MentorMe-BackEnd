@@ -99,6 +99,11 @@ const login = async (req, res) => {
         return res.status(401).json({ message: "Invalid credentials" });
     }
     ;
+    if (!user.isAuthenticated) {
+        await (0, verifyAndSend_1.generateOtpAndSendSms)(user._id, phone);
+        return res.status(200).json({ success: true, message: 'verify the otp send to you' });
+    }
+    ;
     const token = await helpers.generateAccessToken(user._id);
     return res.status(200).json({ success: true, token: token });
 };
