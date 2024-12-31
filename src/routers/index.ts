@@ -1,19 +1,20 @@
-import { Router } from "express";
 import authRoutes from "./auth.routers";
 import userRoutes from "./user.routers";
 import menteeroutes from "./mentee.router";
 import mentorRoutes from "./mentor.routers"
-import { deleteUser } from "../controllers/user.controller";
 import { verifyAccessToken } from "../helpers";
+import { Application } from "express-serve-static-core";
 
-const router = Router();
+const applyRouters = async (app: Application) => {
+    app.use("/auth", authRoutes);
 
-router.use('/auth', authRoutes);
+    app.use("/user", verifyAccessToken, userRoutes);
 
-router.use('/user', verifyAccessToken, userRoutes);
+    app.use("/mentee", verifyAccessToken, menteeroutes);
 
-router.use('/mentee', verifyAccessToken, menteeroutes);
+    app.use("/mentor", verifyAccessToken, mentorRoutes);
+    
+    return app;
+};
 
-router.use("/mentor", verifyAccessToken, mentorRoutes);
-
-export default router;
+export default applyRouters;
