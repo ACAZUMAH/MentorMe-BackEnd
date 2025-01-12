@@ -32,8 +32,7 @@ export const verifyToken = async (req: Request, _res: Response, next: NextFuncti
         req.User = user;
         
         return next();
-    } catch (error) {
-        logger.error(error);
-        process.exit(1)
+    } catch (err) {
+        throw new createError.Unauthorized(err?.message || "Invalid token");
     }
 };

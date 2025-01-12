@@ -197,7 +197,7 @@ export const getMentorsOrMentees = async (filter: userFilter) => {
         { fullName: { $regex: filter.search, $options: "i" } },
         { programmeOfStudy: { $regex: filter.search, $options: "i" } },
         { level: { $regex: filter.search, $options: "i" } },
-        { about: { $regex: filter.search, $options: "i " } },
+        { about: { $regex: filter.search, $options: "i" } },
         { acadamicFields: { $regex: filter.search, $options: "i" } },
       ],
     }),
@@ -234,6 +234,7 @@ export const getMyMentors = async (filter: userFilter) => {
   }
 
   const query: FilterQuery<userDocument> = {
+    ...({ _id: { $in: mentee.mentors } }),
     ...(filter.fullName && { fullName: filter.fullName }),
     ...(filter.programmeOfStudy && {
       programmeOfStudy: filter.programmeOfStudy,
@@ -257,11 +258,7 @@ export const getMyMentors = async (filter: userFilter) => {
 
   const options: QueryOptions = { skip, lean: true, limit: limit + 1, sort };
 
-  const mentors = await userModel.find(
-    { _id: { $in: mentee.mentors }, query },
-    { password: 0, __v: 0 },
-    options
-  );
+  const mentors = await userModel.find(query, { password: 0, __v: 0 }, options);
 
   return await helpers.getPageFormat(mentors, page, limit);
 };
@@ -284,6 +281,7 @@ export const getMyMentees = async (filter: userFilter) => {
   }
 
   const query: FilterQuery<userDocument> = {
+    ...({ _id: { $in: data.mentees } }),
     ...(filter.fullName && { fullName: filter.fullName }),
     ...(filter.programmeOfStudy && {
       programmeOfStudy: filter.programmeOfStudy
@@ -307,11 +305,7 @@ export const getMyMentees = async (filter: userFilter) => {
 
   const options : QueryOptions = {skip, lean: true, limit: limit + 1, sort }
 
-  let mentees = await userModel.find(
-    { _id: { $in: data.mentees }, query },
-    { password: 0, __v: 0 },
-    options
-  );
+  let mentees = await userModel.find(query, { password: 0, __v: 0 }, options);
 
   return await helpers.getPageFormat(mentees, page, limit);
 

@@ -34,7 +34,7 @@ export const jwtSign = (obj: object) => {
 
 export const jwtVerify = (token: string): any => {
   return jwt.verify(token, `${process.env.JWT_SECRET}`)
-}
+};
 
 /**
  * 
@@ -51,8 +51,7 @@ export const verifySocketToken = async (socket: any, next: NextFunction) => {
     socket.user = user;
     next();
   } catch (error) {
-    console.log(error);
-    process.exit(1);
+    throw createError.Unauthorized(error?.message);
   }
 };
 
