@@ -1,5 +1,5 @@
-import * as messages from "../services/messages/message";
-import { combineIds } from "../services/users-services/index";
+import * as messages from "../services/messaging/messages/message";
+import { combineIds } from "../services/user/index";
 
 /**
  *

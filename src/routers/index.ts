@@ -1,20 +1,41 @@
-import authRoutes from "./auth.routers";
-import userRoutes from "./user.routers";
-import menteeroutes from "./mentee.router";
-import mentorRoutes from "./mentor.routers"
-import { verifyAccessToken } from "../helpers";
-import { Application } from "express-serve-static-core";
+import { Router, Express } from "express";
+import authRoutes from "./auth/auth.routers";
+import userRoutes from "./user/user.routers";
+import menteeRoutes from "./mentee/mentee.router";
+import mentorRoutes from "./mentor/mentor.routers";
+import { verifyToken } from "../middlewares/verify-token";
 
-const applyRouters = async (app: Application) => {
-    app.use("/auth", authRoutes);
+const routes: { path: string; router: Router; useToken: boolean }[] = [
+  {
+    path: "/auth",
+    router: authRoutes,
+    useToken: false,
+  },
+  {
+    path: "/user",
+    router: userRoutes,
+    useToken: true,
+  },
+  {
+    path: "/mentee",
+    router: menteeRoutes,
+    useToken: true,
+  },
+  {
+    path: "/mentor",
+    router: mentorRoutes,
+    useToken: true,
+  },
+];
 
-    app.use("/user", verifyAccessToken, userRoutes);
-
-    app.use("/mentee", verifyAccessToken, menteeroutes);
-
-    app.use("/mentor", verifyAccessToken, mentorRoutes);
-    
-    return app;
+const applyRouters = async (app: Express) => {
+  routes.map((route) => {
+    if (route.useToken) {
+      app.use(route.path, verifyToken, route.router);
+    } else {
+      app.use(route.path, route.router);
+    }
+  });
 };
 
 export default applyRouters;

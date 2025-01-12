@@ -1,7 +1,7 @@
-import createHttpError from "http-errors";
+import createError from "http-errors";
 import { NextFunction, Request, Response } from "express";
-import rollbar from "./rollbarLogger";
-
+import { logger, rollbar } from "../logger";
+import { constructHTTPRespone } from "../common/helpers";
 /**
  * catch all errors and return a custom error message
  * @param err error object
@@ -11,11 +11,11 @@ import rollbar from "./rollbarLogger";
  */
 const errorHandler = (err:any, req:Request, res:Response, next:NextFunction) => {
     rollbar.log(err);
-    console.log(err);
-    if(err instanceof createHttpError.HttpError){
-        return res.status(err.statusCode).json({ errors: [{ message: err.message }] });
+    logger.error(err);
+    if(err instanceof createError.HttpError){
+        return constructHTTPRespone(null, err, err.status)(res);
     }
-    return res.status(500).json({errors: [{ message: 'Internal Server Error' }]});
+    return constructHTTPRespone(null, createError(500, 'Server Error'), 500)(res)
 };
 
 export default errorHandler; 
