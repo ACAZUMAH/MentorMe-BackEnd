@@ -119,9 +119,7 @@ export const getforwardedResources = async (filter: resourceFilter) => {
  */
 export const findResourcesByIds = async (list: string[] | Types.ObjectId[]) => {
     const resource = await resourceModel.find({ _id: { $in: list } },{ forward_to_mentees: 0 });
-    if(!resource){
-        throw new createError.NotFound('No resources found');
-    };
+    if(!resource) throw new createError.NotFound('No resources found');
     return resource;
 };
 
@@ -131,8 +129,8 @@ export const findResourcesByIds = async (list: string[] | Types.ObjectId[]) => {
  * @returns 
  */
 export const deleteUploadResource = async (id: string|Types.ObjectId, mentorId: string) => {
-    if (!Types.ObjectId.isValid(id)) {
-        throw new createError.BadRequest("Invalid mentor id");
-    };
-    return await resourceModel.findOneAndDelete({  _id: id, uploadedBy: mentorId });
+    if (!Types.ObjectId.isValid(id)) throw new createError.BadRequest("Invalid mentor id");
+    const deleted = await resourceModel.findOneAndDelete({  _id: id, uploadedBy: mentorId });
+    if (!deleted) throw new createError.NotFound("Resources not found");
+        
 };

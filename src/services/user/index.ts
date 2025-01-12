@@ -68,7 +68,7 @@ export const checkUserExists = async (phone: string) => {
 export const getUserById = async (id: string | Types.ObjectId) => {
   if (!Types.ObjectId.isValid(id))
     throw new createError.BadRequest("Invalid user id");
-  const user = await userModel.findById({ _id: id }, { password: 0, __v: 0 });
+  const user = await userModel.findById({ _id: id }, { password: 0, __v: 0 }, null);
   if (!user) throw new createError.NotFound("User not found");
   return user;
 };
@@ -109,10 +109,10 @@ export const updateIsAuthenticated = async ({ id, opt }: updateAuth) => {
   const user = await userModel.findByIdAndUpdate(
     { _id: id },
     { isAuthenticated: opt },
-    { new: true }
+    { new: true, select: "-password" }
   );
   if (!user) throw new Error("Internal server error");
-  return true;
+  return user;
 };
 
 /**
@@ -124,8 +124,7 @@ export const updateIsAuthenticated = async ({ id, opt }: updateAuth) => {
  * @throws 400 if the id is invalid
  */
 export const getUserByIdAndUpdate = async (data: updateUserInput) => {
-  if (!Types.ObjectId.isValid(data.id))
-    throw new createError.BadRequest("Invalid user id");
+  if (!Types.ObjectId.isValid(data.id)) throw new createError.BadRequest("Invalid user id");
   await validateProfileData(data);
   const user = await userModel.findByIdAndUpdate(
     { _id: data.id },

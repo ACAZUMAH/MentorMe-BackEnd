@@ -3,7 +3,7 @@ import { createExpressApp, createSocketServer } from "./servers";
 import { logger } from "./logger";
 import { connectDB } from "./common/helpers/connectDB";
 import client from "./common/helpers/redisConnectDB";
-import applyMiddlewares from "./middlewares";
+//import applyMiddlewares from "./middlewares";
 import applyRouters from "./routers";
 import Messaging from "./sockets";
 import errorHandler from "./middlewares/error-Handler";
@@ -21,7 +21,7 @@ export const startServer = async () => {
 
   const app = await createExpressApp();
 
-  await applyMiddlewares(app);
+  //await applyMiddlewares(app);
 
   await applyRouters(app);
 

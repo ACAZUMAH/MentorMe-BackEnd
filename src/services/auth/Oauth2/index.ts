@@ -1,6 +1,7 @@
 import passport from 'passport';
 import { Strategy } from 'passport-google-oauth2'
 import * as User from '../../user';
+import { logger } from '../../../logger';
 
 passport.serializeUser((user, done) => {
     done(null, user);
@@ -14,9 +15,9 @@ passport.deserializeUser(async (user: any, done) => {
 export default passport.use(
     new Strategy(
         {
-            clientID: process.env.CLIENT_ID as string,
-            clientSecret: process.env.CLIENT_SECRET as string,
-            callbackURL: process.env.REDIRECT_URL as string,
+            clientID: `${process.env.CLIENT_ID}`,
+            clientSecret: `${process.env.CLIENT_SECRET}`,
+            callbackURL: `${process.env.REDIRECT_URL}`,
             scope: ['email', 'profile']
         }, async (_accessToken, _refreshToken, profile, done) => {
             try {
@@ -31,6 +32,7 @@ export default passport.use(
                 });
                 return done(null, newUser);
             } catch (error) {
+                logger.error(error);
                 return done(error);
             }
         }

@@ -15,8 +15,8 @@ import { isDevelopment } from "../../common/contants";
 export const googleAuth = async (req: Request, res: Response) => {
   const user: any = req.user;
   if (!user) return res.status(401).json({ message: "Invalid credentials" });
-  const token = helpers.jwtSign(user.id);
-  return res.status(200).json({ success: true, token: token });
+  const token = helpers.jwtSign({ id: user.id });
+  return helpers.constructHTTPRespone(token)(res);
 };
 
 /**
@@ -30,12 +30,13 @@ export const createUser = async (req: Request, res: Response) => {
   await services.checkUserExists(phone);
   const user = await services.createUser({ phone, password });
   const token = await createAuth(user._id, 5);
+  if (isDevelopment) return helpers.constructHTTPRespone(token, null, 201)(res)
   await sendSms(phone, token);
-  if (isDevelopment) return res.status(201).json({ code: token });
-  return res.status(201).json({
-    succsss: true,
-    message: "User created verify your otp to get authenticated",
-  });
+  return helpers.constructHTTPRespone(
+    { message: "User created verify your otp to get authenticated" },
+    null,
+    201
+  )(res);
 };
 
 /**
@@ -47,7 +48,7 @@ export const createUser = async (req: Request, res: Response) => {
 export const verifyOtp = async (req: Request, res: Response) => {
   const { code } = req.body;
   const auth = await verifyOtpAndCompleteAuthentication(code);
-  return res.status(200).json({ success: true, user: auth.user,  token: auth.token });
+  return helpers.constructHTTPRespone({ user: auth.user, token: auth.token })(res);
 };
 
 /**
@@ -58,18 +59,19 @@ export const verifyOtp = async (req: Request, res: Response) => {
  */
 export const login = async (req: Request, res: Response) => {
   const { phone, password } = req.body;
-  const user: any = await services.getUserByPhone(phone);
-  const match = await helpers.comparePassword(password, user.password);
+  const auth: any = await services.getUserByPhone(phone);
+  const match = await helpers.comparePassword(password, auth.password);
   if (!match) {
-    return res.status(401).json({ message: "Invalid credentials" });
+    return helpers.constructHTTPRespone({ message: "Invalid credentials" }, null, 401)(res);
   }
-  if (!user.isAuthenticated) {
-    const token = await createAuth(user._id, 5);
+  if (!auth.isAuthenticated) {
+    const token = await createAuth(auth._id, 5);
     await sendSms(phone, token);
-    return res.status(200).json({ success: true, message: "verify the otp send to you" });
+    return helpers.constructHTTPRespone( { message: "verify the otp send to you" })(res)
   }
-  const token = helpers.jwtSign(user._id);
-  return res.status(200).json({ success: true, user: user, token: token });
+  const user = await services.getUserById(auth._id);
+  const token = helpers.jwtSign({ id: user._id });
+  return helpers.constructHTTPRespone({ user: user, token: token })(res);
 };
 
 /**
@@ -82,8 +84,9 @@ export const forgotPassword = async (req: Request, res: Response) => {
   const { phone } = req.body;
   const user: any = await services.getUserByPhone(phone);
   const token = await createAuth(user._id, 5);
+  if(isDevelopment) return helpers.constructHTTPRespone({ code: token })(res);
   await sendSms(phone, token)
-  return res.status(200).json({ success: true, message: "OTP sent to your phone number" });
+  return helpers.constructHTTPRespone({ message: "OTP sent to your phone number" })(res);
 };
 
 /**
@@ -97,10 +100,7 @@ export const newPassword = async (req: Request, res: Response) => {
   const user: any = req.User;
   const hash = await helpers.hashPassword(password);
   await services.getUserByIdAndUpdatePassword({ id: user._id, password: hash });
-  return res.status(200).json({ 
-    success: true, 
-    message: "Password updated successfully" 
-  });
+  return helpers.constructHTTPRespone({ message: "Password updated successfully" })(res);
 };
 
 /**
@@ -114,8 +114,5 @@ export const logOut = async (req: Request, res: Response) => {
   await services.updateIsAuthenticated({ id: user._id, opt: false });
   const token = req.headers['authorization']?.split(" ")[1];
   await blacklistToken(token as string);
-  return res.status(200).json({ 
-    success: true, 
-    message: "Logged out successfully" 
-  });
+  return helpers.constructHTTPRespone({ message: "Logged out successfully" })(res);
 };

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import * as services from "../../services/user/index";
+import { constructHTTPRespone } from "../../common/helpers";
 
 /**
  * update a user's profile data by id
@@ -11,10 +12,8 @@ import * as services from "../../services/user/index";
 export const updateProfile = async (req: Request, res: Response) => {
     const user: any = req.User;
     const data = await services.getUserByIdAndUpdate({ id: user._id, ...req.body });
-    if(data){
-        return res.status(200).json({ success: true, data: data });
-    }
-    return res.status(400).json({ success: false, message: 'Unable to update profile' });
+    if(data) return constructHTTPRespone(data)(res);
+    return constructHTTPRespone({message: 'Unable to update profile'}, null, 500)(res);
 };
 
 /**
@@ -26,7 +25,7 @@ export const updateProfile = async (req: Request, res: Response) => {
 export const getProfile = async (req: Request, res: Response) => {
     const user: any = req.User;
     const profile = await services.getUserById(user._id);
-    return res.status(200).json({ success: true, data: profile});
+    return constructHTTPRespone(profile)(res);
 };
 
 /**
@@ -38,11 +37,10 @@ export const getProfile = async (req: Request, res: Response) => {
 export const deleteUser = async (req: Request, res: Response) => {
     const user: any = req.User;
     const data = await services.findUserByIdAndDelete(user._id);
-    if(data)
-        return res.status(200).json({ success: true, data: data });
-    return res.status(400).json({ success: false, message: 'Unable to delete user' });
+    if(data) return constructHTTPRespone(data)(res);
+    return constructHTTPRespone({ message: "Unable to delete user" }, null, 500)(res);
 };
-
+ 
 /**
  * controller for getting a list of mentors or mentees
  * @param req Request object
@@ -51,8 +49,8 @@ export const deleteUser = async (req: Request, res: Response) => {
  */
 export const getAllMentorsOrMentees = async (req: Request, res: Response) => {
     const data = await services.getMentorsOrMentees({ ...req.query as any });
-    if(data) return res.status(200).json({ success: true, data });
-    return res.status(400).json({success: false, message: `Could not get ${req.query.role}s`}); 
+    if(data) return constructHTTPRespone(data)(res);
+    return constructHTTPRespone({ message: `Could not get ${req.query.role}s` }, null, 404)(res);
 };
 
 /**
@@ -65,17 +63,17 @@ export const getMyMentorsOrMentees = async (req: Request, res: Response) => {
     const user: any = req.User;
     if(user.role === 'Mentor'){
         const mentees = await services.getMyMentees({ id: user._id, ...req.query });
-        return res.status(200).json({ success: true, data: mentees })
+        return constructHTTPRespone(mentees)(res);
     };
     if(user.role === 'Mentee'){
         const mentors = await services.getMyMentors({ id: user._id, ...req.query });
-        return res.status(200).json({ success: true, data: mentors });
+        return constructHTTPRespone(mentors)(res);
     };
-    res.status(200).json({ 
-        success: false,
-        message: user.role === 'Mentor' 
-        ? 'Could not find mentees'
-        : 'Could not find mentors'
-    });
+    return constructHTTPRespone({
+      message:
+        user.role === "Mentor"
+          ? "Could not find mentees"
+          : "Could not find mentors",
+    }, null, 404)(res);
 };
 

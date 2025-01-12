@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {  NextFunction } from "express";
+import {  NextFunction, Response } from "express";
 import createError from "http-errors";
 import { getUserById } from "../../services/user";
 
@@ -133,3 +133,32 @@ export const getPageFormat = async <T>(data: Array<T>, page: number, limit: numb
     info: pageInfo
   };
 };
+
+/**
+ * 
+ * @param data 
+ * @param error 
+ * @param statusCode 
+ * @returns 
+ */
+export const constructHTTPRespone = (
+  data: any = null, 
+  error: null | createError.HttpError = null, 
+  statusCode: number = 200
+) => {
+  return (res: Response ) => {
+
+    const response: any = {
+      success: !error,
+      data: error ? null : data,
+      error: error
+        ? {
+            message: error.message,
+            details: error.details || null,
+          }
+        : null,
+    };
+
+    return res.status(statusCode).json(response)
+  }
+}

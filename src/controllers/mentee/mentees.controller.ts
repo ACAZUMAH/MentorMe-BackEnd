@@ -3,6 +3,7 @@ import * as services from '../../services/mentoship/mentorship';
 import * as resource from '../../services/resources/index'
 import * as mentees from '../../services/mentee'
 import createHttpError from 'http-errors';
+import { constructHTTPRespone } from '../../common/helpers';
 
 /**
  * controller for requesting mentorship from a mentor
@@ -14,7 +15,7 @@ import createHttpError from 'http-errors';
 export const menteeRequestMentorship = async (req: Request, res: Response) => {
     const user: any = req.User;
     const data = await services.requestMentorship({ menteeId: user._id, mentorId: req.params.id });
-    return res.status(200).json({ success: true, data: data });
+    return constructHTTPRespone(data, null, 201)(res);
 };
 
 /**
@@ -26,7 +27,7 @@ export const menteeRequestMentorship = async (req: Request, res: Response) => {
 export const getMenteeRequests = async (req: Request, res: Response) => {
     const user: any = req.User;
     const data = await services.getRequests({ id: user._id, ...req.query });
-    return res.status(200).json({ success: true, data: data });
+    return constructHTTPRespone(data)(res);
 }; 
 
 /**
@@ -41,8 +42,8 @@ export const cancelMentorshipRequest = async (req: Request, res: Response) => {
     const cancel: any = await services.CancelRequest(user._id, req.params.id);
     if(cancel){
         cancel.status = 'canceled';
-    }
-    return res.status(200).json({ success: true, data: cancel });
+    };
+    return constructHTTPRespone(cancel)(res);
 };
 
 
@@ -55,8 +56,8 @@ export const cancelMentorshipRequest = async (req: Request, res: Response) => {
  */
 export const getMentorMeResources = async (req: Request, res: Response) => {
     const user: any = req.User;
-    const data = await resource.getGeneralResources({ ...req.query }) 
-    return res.status(200).json({ success: true, data: data });
+    const data = await resource.getGeneralResources({ ...req.query });
+    return constructHTTPRespone(data)(res);
 };
 
 /**
@@ -68,8 +69,8 @@ export const getMentorMeResources = async (req: Request, res: Response) => {
  */
 export const getUploadedResources = async (req: Request, res: Response) => {
   const user: any = req.User;
-  const forwarded = await resource.getforwardedResources({ menteeId: user._id, ...req.query })
-  return res.status(200).json({ success: true, data: forwarded})
+  const forwarded = await resource.getforwardedResources({ menteeId: user._id, ...req.query });
+  return constructHTTPRespone(forwarded)(res);
 };
 
 /**
@@ -82,9 +83,9 @@ export const bookmarkResources = async (req: Request, res: Response) => {
     const user: any = req.User;
     const bookmarked = await mentees.bookmarkResource(user._id, req.params.id)
     if(bookmarked){
-        return res.status(200).json({ success: true, bookmark: 'bookmarked' });
+        return constructHTTPRespone({ bookmarked: true }, null, 201)(res);
     };
-    return res.status(400).json({ success: false, message: 'Unable to bookmark resources'})
+    return constructHTTPRespone({ message: 'Unable to bookmark resources' }, null, 400)(res);
 };
 
 /**
@@ -96,13 +97,8 @@ export const bookmarkResources = async (req: Request, res: Response) => {
 export const getBookmarkedResources = async (req: Request, res: Response) => {
     const user: any = req.User;
     const bookmarkList: any = await mentees.findBookmarkedResources(user._id);
-    const bookmarkedResources = await resource.findResourcesByIds(bookmarkList.resourcesIds)
-    if(!bookmarkedResources){
-        throw new createHttpError.NotFound('No bookmarekd resources yet');
-    };
-    return res
-      .status(200)
-      .json({ success: true, bookmarked: bookmarkedResources }); 
+    const bookmarkedResources = await resource.findResourcesByIds(bookmarkList.resourcesIds);
+    return constructHTTPRespone(bookmarkedResources)(res);
 };
 
 /**
@@ -114,8 +110,6 @@ export const getBookmarkedResources = async (req: Request, res: Response) => {
 export const removeBookMarkedResource = async (req: Request, res: Response) => {
     const user: any = req.User;
     const unBookmark = await mentees.removeBookmarkedResources(user._id, req.params.id);
-    if(unBookmark){
-        return res.status(200).json({ success: true, message: 'removed'});
-    };
-    return res.status(404).json({ success: false, message: 'Could not get resources'});
+    if(unBookmark) return constructHTTPRespone({ message: "removed" })(res);
+    return constructHTTPRespone({ message: "Could not get resources" }, null, 404)(res);
 };

@@ -4,6 +4,7 @@ import { updateMentor } from "../../services/mentee";
 import * as mentor from "../../services/mentor";
 import * as services from "../../services/mentoship/mentorship";
 import * as resources from "../../services/resources/index";
+import { constructHTTPRespone } from "../../common/helpers";
 
 /**
  * controller for geting mentorship requests by mentor id
@@ -14,7 +15,7 @@ import * as resources from "../../services/resources/index";
 export const getMentorshipRequests = async (req: Request, res: Response) => {
     const user: any = req.User;
     const data = await services.getRequests({ id: user._id, ...req.query });
-    return res.status(200).json({ success: true, data: data });
+    return constructHTTPRespone(data)(res);
 };
 
 /**
@@ -28,7 +29,7 @@ export const acceptRequest = async (req: Request, res: Response) => {
     const data = await services.acceptRequest({ mentorId: user._id, menteeId: req.params.id });
     mentor.updateMentee({ mentorId: user._id, menteeId: req.params.id });
     updateMentor({ mentorId: user._id, menteeId: req.params.id });
-    return res.status(200).json({ success: true, data: data });
+    return constructHTTPRespone(data)(res);
 };
 
 /**
@@ -40,7 +41,7 @@ export const acceptRequest = async (req: Request, res: Response) => {
 export const rejectRequest = async (req: Request, res: Response) => {
     const user: any = req.User;
     const data = await services.rejectRequest({ mentorId: user._id, menteeId: req.params.id });
-    return res.status(200).json({ success: true, data: data });
+    return constructHTTPRespone(data)(res);
 };
 
 
@@ -53,7 +54,7 @@ export const rejectRequest = async (req: Request, res: Response) => {
 export const uploadResources = async (req: Request, res: Response) => {
     const user: any = req.User;
     const upload = await resources.createResource({ uploadedBy: user._id, ...req.body });
-    return res.status(201).json({ success: true, data: upload });
+    return constructHTTPRespone(upload, null, 201)(res);
 };
 
 /**
@@ -65,7 +66,7 @@ export const uploadResources = async (req: Request, res: Response) => {
 export const getMentorUploadedResources = async (req: Request, res: Response) => {
     const user: any = req.User;
     const data = await resources.getResourcesBymentorId({ uploadedBy: user._id, ...req.query }); 
-    return res.status(200).json({ success: true, data: data });
+    return constructHTTPRespone(data)(res);
 };
 
 /**
@@ -76,8 +77,5 @@ export const getMentorUploadedResources = async (req: Request, res: Response) =>
 export const deleteResources = async (req: Request, res: Response) => {
     const user: any = req.User;
     const deleted = await resources.deleteUploadResource(req.params.id, user.id)
-    if(!deleted){
-        throw new createHttpError.NotFound('Resources not found')
-    }
-    res.status(200).json({ success: true, data: deleted });
+    constructHTTPRespone(deleted)(res);
 };

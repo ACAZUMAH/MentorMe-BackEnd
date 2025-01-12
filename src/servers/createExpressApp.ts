@@ -1,11 +1,19 @@
-require('express-async-errors');
+require("express-async-errors");
+import passport from "passport";
+import session from "express-session";
+import connectMongo from "connect-mongodb-session";
 import cors from "cors";
 import helmet, { HelmetOptions } from "helmet";
 import xss from "xss-clean";
 import limit from "express-rate-limit";
-import express, {Application} from 'express';
-import setUpSwagger from '../common/docs';
-import { isDevelopment, isProduction, productionWhiteList } from "../common/contants";
+import express from "express";
+import setUpSwagger from "../common/docs";
+import {
+  isDevelopment,
+  isProduction,
+  productionWhiteList,
+} from "../common/contants";
+import { logger } from "../logger";
 
 const helmetOptions: HelmetOptions = {
   contentSecurityPolicy: false,
@@ -16,12 +24,12 @@ const corsOptions = {
   maxAge: 600,
   credentials: true,
   origin: (origin, callback) => {
-    if(!origin){
+    if (!origin) {
       callback(null, true);
-    } else if(isDevelopment){
-      callback(null, true)
-    } else if(!isProduction && productionWhiteList.includes(origin)){
-      callback(null, true)
+    } else if (isDevelopment) {
+      callback(null, true);
+    } else if (!isProduction && productionWhiteList.includes(origin)) {
+      callback(null, true);
     } else {
       callback(new Error("url not allowed!"));
     }
@@ -36,30 +44,52 @@ const limiter = limit({
 });
 
 export const createExpressApp = async () => {
-    const app = express();
+  const app = express();
 
-    app.set('trust proxy', 1);
+  const mongoStore = connectMongo(session);
 
-    app.use(express.json({ limit: '50mb' }));
-    app.use(express.urlencoded({ extended: true }));
-    
-    app.use(limiter);
+  const store = new mongoStore({
+    uri: process.env.DATABASE_URL,
+    collection: "sessions",
+  });
 
-    app.use(helmet(helmetOptions));
+  store.on("error", (err: any) => logger.error(err));
 
-    app.use(helmet.hidePoweredBy());
-    app.disable('x-powered-by');
+  app.set("trust proxy", 1);
 
-    app.options('*', cors());
-    app.use(cors(corsOptions));
+  app.use(express.json({ limit: "50mb" }));
+  app.use(express.urlencoded({ extended: true }));
 
-    app.use(xss());
+  app.use(
+    session({
+      secret: `${process.env.SESSION_SECRET}`,
+      resave: false,
+      saveUninitialized: false,
+      store: store,
+    })
+  );
 
-    app.get("/", (_, res) => {
-      res.status(200).send("<a href='/api-docs'>docs</a>");
-    });
+  app.use(passport.initialize());
 
-    await setUpSwagger(app);
+  app.use(passport.session());
 
-    return app;
+  app.use(limiter);
+
+  app.use(helmet(helmetOptions));
+
+  app.use(helmet.hidePoweredBy());
+  app.disable("x-powered-by");
+
+  app.options("*", cors());
+  app.use(cors(corsOptions));
+
+  app.use(xss());
+
+  app.get("/", (_, res) => {
+    res.status(200).send("<a href='/api-docs'>docs</a>");
+  });
+
+  await setUpSwagger(app);
+
+  return app;
 };

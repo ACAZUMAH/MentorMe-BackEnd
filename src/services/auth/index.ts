@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 import { authModel } from "../../models";
 import createError from 'http-errors';
 import { generateOTP, jwtSign } from "../../common/helpers";
-import { getUserById, updateIsAuthenticated } from "../user";
+import { updateIsAuthenticated } from "../user";
 
 export const createAuth = async (userId: Types.ObjectId, len: number) => {
     let token = generateOTP(len);
@@ -25,11 +25,9 @@ export const verifyOtpAndCompleteAuthentication = async (token: string) => {
 
     if(new Date(auth.expiresIn) < new Date()) throw new createError.BadRequest('otp expired');
 
-    const user = await getUserById(String(auth.userId));
-
-    await updateIsAuthenticated({ id: user._id, opt: true });
+    const user = await updateIsAuthenticated({ id: String(auth.userId), opt: true });
 
     const authToken = jwtSign({ id: user._id });
 
-    return { user, token };
+    return { user, token: authToken };
 }

@@ -4,7 +4,7 @@
  *   - name: Authentication
  *     description: Routes for user authentication
  */
-require("../../services/auth/index");
+require('../../services/auth/Oauth2/index');
 import { Router } from "express";
 import passport from "passport";
 import { verifyToken } from "../../middlewares/verify-token";
