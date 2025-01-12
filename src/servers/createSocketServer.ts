@@ -1,5 +1,5 @@
 import { Server } from 'socket.io';
-import { verifySocketToken } from '../helpers';
+import { verifySocketToken } from '../common/helpers/index';
 
 
 /**
@@ -7,7 +7,7 @@ import { verifySocketToken } from '../helpers';
  * @param server 
  * @returns 
  */
-export const createsocketServer = async (server: any) => {
+export const createSocketServer = async (server: any) => {
     const io = new Server(server, {
         cors: {
             origin: "*",
@@ -18,4 +18,3 @@ export const createsocketServer = async (server: any) => {
     return io;
 };
 
-export default createsocketServer;

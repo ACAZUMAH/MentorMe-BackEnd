@@ -1,49 +1,65 @@
 require('express-async-errors');
-require('../services/types');
+import cors from "cors";
+import helmet, { HelmetOptions } from "helmet";
+import xss from "xss-clean";
+import limit from "express-rate-limit";
 import express, {Application} from 'express';
-import session from 'express-session';
-import route from '../routers';
-import errorHandler from '../middlewares/error-Handler';
-import helmet from 'helmet';
-import cors from 'cors';
-import xss from 'xss-clean';
-import limit from 'express-rate-limit';
-import passport from 'passport';
-import setUpSwagger from '../docs';
-import client from '../models/connect/redis';
-import connectRedis from 'connect-redis';
+import setUpSwagger from '../common/docs';
+import { isDevelopment, isProduction, productionWhiteList } from "../common/contants";
 
-const createExpressApp = async (): Promise<Application> => {
-    const redisStore = connectRedis(session)
-    const limiter = limit({
-        windowMs: 15 * 60 * 1000,
-        max: 100
-    })
+const helmetOptions: HelmetOptions = {
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+};
+
+const corsOptions = {
+  maxAge: 600,
+  credentials: true,
+  origin: (origin, callback) => {
+    if(!origin){
+      callback(null, true);
+    } else if(isDevelopment){
+      callback(null, true)
+    } else if(!isProduction && productionWhiteList.includes(origin)){
+      callback(null, true)
+    } else {
+      callback(new Error("url not allowed!"));
+    }
+  },
+};
+
+const limiter = limit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+});
+
+export const createExpressApp = async () => {
     const app = express();
+
     app.set('trust proxy', 1);
-    app.use(express.json());
-    app.use(session({
-        store: new redisStore({ client: client }),
-        secret: process.env.SESSION_SECRET as string,
-        resave: false,
-        saveUninitialized: false 
-    }));
-    app.use(passport.initialize());
-    app.use(passport.session()); 
-    app.use(limiter); 
-    app.use(cors());
-    app.use(helmet());
+
+    app.use(express.json({ limit: '50mb' }));
+    app.use(express.urlencoded({ extended: true }));
+    
+    app.use(limiter);
+
+    app.use(helmet(helmetOptions));
+
+    app.use(helmet.hidePoweredBy());
+    app.disable('x-powered-by');
+
+    app.options('*', cors());
+    app.use(cors(corsOptions));
+
     app.use(xss());
-    app.get("/", (_req, res) => {
+
+    app.get("/", (_, res) => {
       res.status(200).send("<a href='/api-docs'>docs</a>");
     });
-    app.use(route);
-    await setUpSwagger(app);
-    app.use(errorHandler);
-    app.all('*', (_req, res) => {
-        return res.json({ message: 'unable to retrieve requested resource' });
-    });
-    return Promise.resolve(app);
-}
 
-export default createExpressApp;
+    await setUpSwagger(app);
+
+    return app;
+};

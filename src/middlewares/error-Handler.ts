@@ -1,5 +1,6 @@
 import createHttpError from "http-errors";
 import { NextFunction, Request, Response } from "express";
+import { logger, rollbar } from '../logger';
 
 /**
  * catch all errors and return a custom error message
@@ -9,7 +10,8 @@ import { NextFunction, Request, Response } from "express";
  * @param next next function
  */
 const errorHandler = (err:any, req:Request, res:Response, next:NextFunction) => {
-    console.log(err);
+    rollbar.log(err);
+    logger.error(err);
     if(err instanceof createHttpError.HttpError){
         return res.status(err.statusCode).json({ errors: [{ message: err.message }] });
     }
