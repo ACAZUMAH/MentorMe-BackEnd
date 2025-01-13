@@ -39,11 +39,11 @@ export const getMenteeRequests = async (req: Request, res: Response) => {
  */
 export const cancelMentorshipRequest = async (req: Request, res: Response) => {
     const user: any = req.User;
-    const cancel: any = await services.CancelRequest(user._id, req.params.id);
-    if(cancel){
-        cancel.status = 'canceled';
+    const canceled : any = await services.CancelRequest(user._id, req.params.id);
+    if(canceled){
+        canceled.cancel.status = 'canceled';
     };
-    return constructHTTPRespone(cancel)(res);
+    return constructHTTPRespone(canceled)(res);
 };
 
 

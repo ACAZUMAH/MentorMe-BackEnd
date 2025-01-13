@@ -13,7 +13,6 @@ export interface messageDocument {
 }
 
 export interface messageInput {
-  _id: Types.ObjectId;
   messagesIds: string;
   senderId: string;
   message: String;

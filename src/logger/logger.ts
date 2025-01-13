@@ -1,4 +1,4 @@
-import winston, { error } from "winston";
+import winston from "winston";
 const { combine, colorize, timestamp, json, errors } = winston.format;
 
 export const logger = winston.createLogger({

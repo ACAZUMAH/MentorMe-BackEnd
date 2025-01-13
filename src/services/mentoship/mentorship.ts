@@ -77,8 +77,9 @@ export const acceptRequest = async (ids: roleIds) => {
 
   if (!request) throw new createError.NotFound("No request found");
 
-  const ralated = await getRequestedInfo(request.menteeId)
-  return request;
+  const related = await getRequestedInfo(request.menteeId)
+
+  return { request, related };
 };
 
 /**
@@ -99,7 +100,7 @@ export const rejectRequest = async (ids: roleIds) => {
 
   if (!request) throw new createError.NotFound("No request found");
 
-  const related = await getRequestedInfo(request.mentorId);
+  const related = await getRequestedInfo(request.menteeId);
   
   return { request, related };
 };
@@ -115,11 +116,13 @@ export const CancelRequest = async (menteeId: string, requestId: string) => {
     throw new createError.BadRequest("Invalid user or request id");
   };
 
-  const cancel = await mentorshipModel.findOneAndDelete({ _id: requestId, menteeId });
+  const cancel: any = await mentorshipModel.findOneAndDelete({ _id: requestId, menteeId });
 
   if (!cancel)  throw new createError.BadRequest("No request found");
+
+  const related = await getRequestedInfo(cancel.mentorId);
   
-  return cancel;
+  return { cancel , related };
 };
 
 /**

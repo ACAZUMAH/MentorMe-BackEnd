@@ -226,7 +226,7 @@ export const getMyMentors = async (filter: userFilter) => {
   if (!Types.ObjectId.isValid(filter.id!))
     throw new createError.BadRequest("Invalid user id");
 
-  const mentee = await Mentee.getMenteeData(String(filter.id));
+  const mentee = await Mentee.getMenteeData(filter.id!);
 
   if (!mentee?.mentors) {
     throw new createError.NotFound("You don't have mentors yet");
@@ -274,7 +274,7 @@ export const getMyMentees = async (filter: userFilter) => {
   if (!Types.ObjectId.isValid(filter.id!)) {
     throw new createError.BadRequest("Invalid user id");
   }
-  const data = await Mentor.getMentorData(String(filter.id));
+  const data = await Mentor.getMentorData(filter.id!);
   if (!data?.mentees) {
     throw new createError.NotFound("You don't have mentees yet");
   }
