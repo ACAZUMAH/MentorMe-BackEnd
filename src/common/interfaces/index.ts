@@ -3,3 +3,7 @@ export * from './shared/index';
 export * from './mentorship/index';
 export * from './resources/index';
 export * from './message/index';
+export * from './auth/index';
+export * from './bookmark/index';
+export * from './mentee/index';
+export * from './mentor/index';

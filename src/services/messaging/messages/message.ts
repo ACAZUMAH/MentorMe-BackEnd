@@ -3,14 +3,14 @@ import { messageModel } from "../../../models";
 import { connectionIdsModel } from "../../../models";
 import validateMessageData from "./validate-message";
 import createHttpError from "http-errors";
-import { messageDocument } from "../../../common/interfaces";
+import { messageInput } from "../../../common/interfaces";
 
 /**
  * add a new message to the sender and receiver database 
  * @param data 
  * @returns 
  */
-export const newMesage = async (data: messageDocument ) => {
+export const newMesage = async (data: messageInput ) => {
     await validateMessageData(data);
     const messages = await messageModel.findOneAndUpdate(
         { messagesIds: data.messagesIds },

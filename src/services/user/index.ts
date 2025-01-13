@@ -4,7 +4,6 @@ import {
   updateAuth,
   updatePasswordInput,
   updateUserInput,
-  userArrayFilter,
   userDocument,
   userFilter,
 } from "../../common/interfaces";
@@ -331,29 +330,9 @@ export const combineIds = async (sender: string, receiver: string) => {
 /**
  * get mentees or mentors info
  * @param filter.data - array of objects containing mentorIds or menteeIds
- * @param filter.limit - limit number
- * @param filter.page - page number
  * @returns mentors or mentees info
  */
-export const getMenteeOrMentorInArray = async (filter: userArrayFilter) => {
-
-  const menteeIds = filter.data.map((doc) => new Types.ObjectId(doc.menteeId!));
-  const mentorIds = filter.data.map((doc) => new Types.ObjectId(doc.mentorId!));
-
-  const query = {
-    $or: [
-      { _id: { $in: menteeIds } },
-      { _id: { $in: mentorIds } }
-    ]
-  }
-
-  const page = helpers.getSanitizePage(filter.page);
-  const limit = helpers.getSanitizeLimit(filter.limit);
-  const skip = helpers.getSanitizeOffset(limit, page);
-
-  const options: QueryOptions = { skip, lean: true, limit: limit + 1, sort: { createdAt: -1 }}
-
-  const data = await userModel.find(query, { password: 0, __v: 0 }, options);
-
-  return await helpers.getPageFormat(data, page, limit);
+export const getRequestedInfo = async (id: string | Types.ObjectId) => {
+  const data = await userModel.find({ _id: id }, { password: 0, __v: 0 });
+  return data;
 }

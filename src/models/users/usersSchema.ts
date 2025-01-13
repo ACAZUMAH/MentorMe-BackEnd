@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import { userDocument } from "../../common/interfaces";
 
-const usersSchema = new mongoose.Schema({
+const usersSchema = new mongoose.Schema<userDocument>({
     fullName: { type: String, maxLength: 100 },
     profile_url: { type: String },
     phone: { type: String, required: true },
