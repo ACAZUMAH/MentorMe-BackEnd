@@ -1,5 +1,5 @@
 import Ajv from 'ajv';
-import { messageType } from '../../types';
+import { messageInput } from '@/common/interfaces';
 import createHttpError from 'http-errors';
 
 /**
@@ -7,7 +7,7 @@ import createHttpError from 'http-errors';
  * @param data 
  * @returns 
  */
-const validateMessageData = async (data: messageType) => {
+const validateMessageData = async (data: messageInput) => {
     const ajv = new Ajv();
 
     const schema = {

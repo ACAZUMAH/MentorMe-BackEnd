@@ -1,4 +1,4 @@
-import * as messages from "../services/messaging/messages/message";
+import * as messages from "../services/messaging/message";
 import { combineIds } from "../services/user/index";
 
 /**
@@ -54,17 +54,17 @@ const sendPending = async (socket: any, io: any) => {
   socket.on("join", async ({ senderId }) => {
     const messagesIds = await combineIds(senderId, socket.user.id);
     const pendingMessages: any = await messages.findPendingMeassages(
-      messagesIds,
+      messagesIds
     );
     const receiverSocket = await messages.findReceiverSocketId(socket.user.id);
     if (pendingMessages.messages) {
-      for(const message of pendingMessages.messages){
-        if(message.senderId !== socket.user.id){
+      for (const message of pendingMessages.messages) {
+        if (message.senderId !== socket.user.id) {
           io.to(receiverSocket?.socketId).emit("receiveMessage", message);
           await messages.updateDelivered(messagesIds, message._id);
-        };
-      };
-    };
+        }
+      }
+    }
   });
 };
 

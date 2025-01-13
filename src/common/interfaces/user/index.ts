@@ -1,5 +1,4 @@
 import { Types } from "mongoose";
-import { mentorshipDocument } from "../mentorship";
 
 export interface userDocument {
   _id: Types.ObjectId
@@ -12,6 +11,7 @@ export interface userDocument {
   level?: string | null
   about?: string | null
   acadamicFields?: string[] | null
+  password: string
   isAuthenticated: boolean
 }
 
@@ -59,10 +59,4 @@ export interface userFilter {
   fullName?: string | null;
   programmeOfStudy?: string | null;
   level?: string | null;
-}
-
-export interface userArrayFilter {
-  data: Array<mentorshipDocument>;
-  page?: number | string | null;
-  limit?: number | string | null;
 }

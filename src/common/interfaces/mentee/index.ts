@@ -1,6 +1,9 @@
-// import { Types } from "mongoose";
+import { Types } from "mongoose";
+import { bookmarkDocument } from "../bookmark";
 
-// export interface roleIds {
-//     menteeId: string | Types.ObjectId
-//     mentorId: string | Types.ObjectId
-// };
+export interface menteeDocument {
+    _id: Types.ObjectId
+    menteeId: string | Types.ObjectId
+    mentors: Array<string | Types.ObjectId>
+    bookmarks: bookmarkDocument
+};

@@ -2,7 +2,7 @@ import { resourceModel } from "../../models";
 import { FilterQuery, QueryOptions, Types } from "mongoose";
 import validateResources from "./validate-resources";
 import createError from "http-errors";
-import { resourceDocument, resourceFilter } from "../../common/interfaces/resources";
+import { resourceDocument, resourceInput, resourceFilter } from "../../common/interfaces/resources";
 import * as helpers from '../../common/helpers/index';
 
 /**
@@ -10,7 +10,7 @@ import * as helpers from '../../common/helpers/index';
  * @param data mentorId, resources_ref and share_with_mentees 
  * @returns uploaded resources
  */
-export const createResource = async (data: resourceDocument) => {
+export const createResource = async (data: resourceInput) => {
     if(data.uploadedBy && !Types.ObjectId.isValid(data.uploadedBy)){
         throw createError.BadRequest('Invalid Mentor id');
     };

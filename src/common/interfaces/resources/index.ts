@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 
 export interface resourceDocument {
+    _id: Types.ObjectId
     uploadedBy?: string | Types.ObjectId;
     title: string;
     resources_url: string;
@@ -15,3 +16,10 @@ export interface resourceFilter {
     title?: string | null
     menteeId?: string | null
 }
+
+export interface resourceInput {
+    uploadedBy?: string | Types.ObjectId;
+    title: string;
+    resources_url: string;
+    forward_to_mentees?: string[];
+};

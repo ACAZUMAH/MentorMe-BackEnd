@@ -1,8 +1,9 @@
 import { mentorshipModel } from "../../models";
 import createError from "http-errors";
-import { Types } from "mongoose";
-import { mentorshipfilter, roleIds } from "../../common/interfaces";
-import { getMenteeOrMentorInArray } from "../user";
+import { Types, QueryOptions, FilterQuery } from "mongoose";
+import { mentorshipDocument, mentorshipfilter, roleIds } from "../../common/interfaces";
+import { getRequestedInfo } from "../user";
+import * as helpers from '../../common/helpers'
 
 /**
  * create a mentorship request to a mentor by mentee
@@ -11,11 +12,14 @@ import { getMenteeOrMentorInArray } from "../user";
  * @throws 400 if id is invalid
  */
 export const requestMentorship = async (ids: roleIds) => {
-  if (Types.ObjectId.isValid(ids.mentorId) && Types.ObjectId.isValid(ids.menteeId)) {
-    const request = mentorshipModel.create({ ...ids });
-    return request;
-  }
-  throw new createError.BadRequest("Invalid mentor or mentee id");
+  if (!Types.ObjectId.isValid(ids.mentorId) || !Types.ObjectId.isValid(ids.menteeId)) {
+    throw new createError.BadRequest("Invalid mentor or mentee id");
+  };
+
+  const request = await mentorshipModel.create({ ...ids });
+  const relatedInfo = await getRequestedInfo(ids.mentorId);
+
+  return { request, related: relatedInfo };
 };
 
 /**
@@ -26,11 +30,33 @@ export const requestMentorship = async (ids: roleIds) => {
 export const getRequests = async (filter: mentorshipfilter) => {
   if (!Types.ObjectId.isValid(filter.id)) throw new createError.BadRequest("Invalid mentee id");
 
-  const result = await mentorshipModel.find({ $or: [{ menteeId: filter.id }, { mentorId: filter.id }] });
+  const query: FilterQuery<mentorshipDocument> = {
+    $or: [{ menteeId: filter.id }, { mentorId: filter.id }]
+  };
 
-  if(!result) throw new createError.BadRequest("No mentorship requests found");
+  const page = helpers.getSanitizePage(filter.page);
+  const limit = helpers.getSanitizeLimit(filter.limit);
+  const skip = helpers.getSanitizeOffset(limit, page);
 
-  return await getMenteeOrMentorInArray({ data: result, page: filter.page, limit: filter.limit })
+  const options: QueryOptions = {skip, lean: true, limit: limit + 1, sort: { createdAt: -1 },};
+
+  const requests: any = await mentorshipModel.find(query, null, options);
+
+  if(!Array.isArray(requests) || !requests.length) return await helpers.getPageFormat([], page, limit);
+  
+  const data = await Promise.all(
+    requests.map( async (request: any) => {
+      const isMentee = filter.id === request.menteeId.toString();
+
+      const relatedInfo = isMentee === request.menteeId 
+        ? await getRequestedInfo(request.mentorId)
+        : await getRequestedInfo(request.menteeId);
+
+      return { ...request, related: relatedInfo };
+    })
+  );
+
+  return await helpers.getPageFormat(data, page, limit);
 };
 
 /**
@@ -43,7 +69,7 @@ export const acceptRequest = async (ids: roleIds) => {
     throw new createError.BadRequest("Invalid mentor or mentee id");
   }
 
-  const request = await mentorshipModel.findOneAndUpdate(
+  const request: any = await mentorshipModel.findOneAndUpdate(
     { mentorId: ids.mentorId, menteeId: ids.menteeId },
     { status: "accepted" },
     { new: true }
@@ -51,7 +77,9 @@ export const acceptRequest = async (ids: roleIds) => {
 
   if (!request) throw new createError.NotFound("No request found");
 
-  return request;
+  const related = await getRequestedInfo(request.menteeId)
+
+  return { request, related };
 };
 
 /**
@@ -64,15 +92,17 @@ export const rejectRequest = async (ids: roleIds) => {
     throw new createError.BadRequest("Invalid mentor or mentee id");
   }
 
-  const request = await mentorshipModel.findOneAndUpdate(
+  const request: any = await mentorshipModel.findOneAndUpdate(
     { mentorId: ids.mentorId, menteeId: ids.menteeId },
     { status: "rejected" },
     { new: true }
   );
 
   if (!request) throw new createError.NotFound("No request found");
+
+  const related = await getRequestedInfo(request.menteeId);
   
-  return request;
+  return { request, related };
 };
 
 /**
@@ -86,11 +116,13 @@ export const CancelRequest = async (menteeId: string, requestId: string) => {
     throw new createError.BadRequest("Invalid user or request id");
   };
 
-  const cancel = await mentorshipModel.findOneAndDelete({ _id: requestId, menteeId });
+  const cancel: any = await mentorshipModel.findOneAndDelete({ _id: requestId, menteeId });
 
   if (!cancel)  throw new createError.BadRequest("No request found");
+
+  const related = await getRequestedInfo(cancel.mentorId);
   
-  return cancel;
+  return { cancel , related };
 };
 
 /**
